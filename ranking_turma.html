@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Ranking da Turma</title>
+    <link rel="stylesheet" href="style.css"> 
+    <style>
+        /* Estilos básicos para o ranking, ajuste conforme seu style.css */
+        .ranking-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #rankingList {
+            list-style: none;
+            padding: 0;
+        }
+        #rankingList li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 1.1em;
+        }
+        .rank-position {
+            font-weight: bold;
+            color: #007bff; /* Cor primária */
+            width: 50px;
+        }
+        .aluno-nome {
+            flex-grow: 1;
+        }
+        .aluno-xp {
+            font-weight: bold;
+            color: #28a745; /* Cor de sucesso */
+        }
+    </style>
+</head>
+<body>
+    <div class="ranking-container">
+        <h1>🏆 Ranking: <span id="nomeTurmaRanking">...</span></h1>
+        <p id="statusMensagem" class="message error" style="display: none;"></p>
+
+        <ol id="rankingList">
+            <li>Carregando...</li>
+        </ol>
+
+        <p style="margin-top: 20px; text-align: center;">
+            <a href="https://drive.google.com/drive/folders/1mIfawen7dlTo-OqPcrEMVmzzJbCA7lGn?usp=drive_link.html">
+                Material para Estudo
+            </a>
+        </p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script>
+        // *******************************************************************
+        // COPIE SUA CONFIGURAÇÃO COMPLETA E CORRETA AQUI
+        // *******************************************************************
+        const firebaseConfig = {
+            apiKey: "AIzaSyCokj8lu7OEwynnteAT3iObnz8qbV1Hvwk",
+            authDomain: "centro-social-tecla-merlo.firebaseapp.com",
+            projectId: "centro-social-tecla-merlo",
+            storageBucket: "centro-social-tecla-merlo.firebasestorage.app",
+            messagingSenderId: "653126314182",
+            appId: "1:653126314182:web:8769015d8e5b3764aa4fc7",
+            measurementId: "G-MH4XF9W6XH"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = app.firestore();
+        window.db = db;
+    </script>
+    
+    <script src="gamificacao.js"></script>
+
+    <script>
+        
+        // Função para mostrar feedback ao usuário
+        function showStatus(message, isError = false) {
+            const statusElement = document.getElementById('statusMensagem'); 
+            if (!message) {
+                statusElement.style.display = 'none';
+                return;
+            }
+            statusElement.textContent = message;
+            statusElement.className = isError ? 'message error' : 'message success';
+            statusElement.style.display = 'block';
+        }
+
+        async function carregarDadosRanking(turmaId) {
+            if (!turmaId) {
+                showStatus("ID da Turma não encontrado na URL.", true);
+                return;
+            }
+
+            const rankingList = document.getElementById('rankingList');
+            const turmaNomeElement = document.getElementById('nomeTurmaRanking');
+            rankingList.innerHTML = '<li>Carregando ranking...</li>';
+            
+            try {
+                // 1. Obter o nome da turma
+                const turmaDoc = await window.db.collection("turmas").doc(turmaId).get();
+                if (turmaDoc.exists) {
+                    turmaNomeElement.textContent = turmaDoc.data().nome;
+                } else {
+                    turmaNomeElement.textContent = "Turma Desconhecida";
+                }
+                
+                // 2. Chamar a função de ranking (usando o nome exportado no gamificacao.js)
+                const alunosRanking = await gerarRankingIndividualPorTurma(turmaId); 
+
+                if (alunosRanking.length > 0) {
+                    rankingList.innerHTML = alunosRanking.map((aluno, index) => {
+                        return `
+                            <li>
+                                <span class="rank-position">#${index + 1}</span>
+                                <span class="aluno-nome">${aluno.nome}</span>
+                                <span class="aluno-xp">${aluno.xpTotal || 0} XP</span>
+                            </li>
+                        `;
+                    }).join('');
+                    showStatus("", false); // Limpa a mensagem de status
+                } else {
+                    rankingList.innerHTML = '<li>Nenhum aluno encontrado nesta turma.</li>';
+                    showStatus("", false);
+                }
+
+            } catch (error) {
+                // O erro de índice do Firebase (se existir) será pego aqui
+                console.error("Erro ao carregar ranking da turma:", error);
+                showStatus("Erro ao carregar ranking da turma. Verifique o console para índices pendentes.", true);
+            }
+        }
+
+        function inicializarRankingTurma() {
+            try {
+                // Extrai o turmaId da URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const turmaId = urlParams.get('turmaId');
+                
+                if (turmaId) {
+                    carregarDadosRanking(turmaId);
+                } else {
+                    document.getElementById('nomeTurmaRanking').textContent = "Erro";
+                    showStatus("Nenhuma turma especificada na URL.", true);
+                }
+                
+            } catch (error) {
+                console.error("Erro durante a inicialização:", error);
+                showStatus("Erro fatal de inicialização.", true); 
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', inicializarRankingTurma);
+    </script>
+</body>
+</html>

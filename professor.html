@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Professor - Painel de Controle e Gestão</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <div class="container">
+        <h1>💻 Área do Professor</h1>
+        <p style="text-align: center;">Área de controle para cadastro de turmas/alunos e lançamento de pontuações.</p>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'CadastroPontuacao')">Cadastro e Pontuação</button>
+            <button class="tab-button" onclick="openTab(event, 'GestaoDados')">Gestão de Dados</button>
+        </div>
+        
+        <div id="CadastroPontuacao" class="tab-content active">
+
+            <h2>📖 Cadastrar Nova Turma</h2>
+            <form id="formCadastrarTurma">
+                <div class="form-group">
+                    <label for="nomeTurma">Nome da Turma:</label>
+                    <input type="text" id="nomeTurma" required placeholder="Ex: Agência Alpha">
+                </div>
+                <div class="form-group">
+                    <label for="metaMensal">Meta Mensal de XP (Ex: 10000):</label>
+                    <input type="number" id="metaMensal" required placeholder="Mínimo de XP para o mês">
+                </div>
+                <button type="submit">Cadastrar Turma</button>
+                <p id="statusTurma" class="message success" style="display: none;"></p>
+            </form>
+
+            <hr>
+            
+            <h2>📖 Cadastrar Novo Aluno</h2>
+            <form id="formCadastrarAluno">
+                <div class="form-group">
+                    <label for="selectTurmaCadastro">Selecionar Turma:</label>
+                    <select id="selectTurmaCadastro" required>
+                        <option value="">-- Escolha a Turma --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nomeAluno">Nome do Aluno:</label>
+                    <input type="text" id="nomeAluno" required placeholder="Ex: João da Silva">
+                </div>
+                <button type="submit">Cadastrar Aluno</button>
+                <p id="statusAluno" class="message success" style="display: none;"></p>
+            </form>
+
+            <hr>
+
+            <h2>✨ Lançamento de Pontos (Missões)</h2>
+            <form id="formLancarPontos">
+                
+                <div class="form-group">
+                    <label for="selectTurmaPontuacao">1. Selecionar Turma:</label>
+                    <select id="selectTurmaPontuacao" required> 
+                        <option value="">-- Escolha a Turma --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="selectAlunoPontuacao">2. Selecionar Aluno:</label>
+                    <select id="selectAlunoPontuacao" required>
+                        <option value="">-- Escolha a Turma primeiro --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="selectMissao">3. Selecionar Missão/Atividade:</label>
+                    <select id="selectMissao" required>
+                        <option value="">-- Escolha a Missão --</option>
+                    </select>
+                </div>
+                <button type="submit">Lançar Pontuação</button>
+                <p id="statusPontos" class="message success" style="display: none;"></p>
+            </form>
+
+        </div>
+
+        <div id="GestaoDados" class="tab-content">
+            <h2>📊 Gestão de Turmas e Alunos</h2>
+            <p>Clique no nome da turma para expandir e ver os alunos. Use os ícones para editar (✏️) ou excluir (❌).</p>
+            
+            <div id="accordionTurmas">
+                <p>Carregando dados de gestão...</p>
+            </div>
+            
+            <p id="statusGestao" class="message success" style="display: none;"></p>
+        </div>
+
+        <p style="margin-top: 40px; text-align: center;"><a href="ranking_geral.html">Ver Ranking Geral (Visão Professor)</a></p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script>
+        // *******************************************************************
+        // COPIE SUA CONFIGURAÇÃO COMPLETA E CORRETA AQUI
+        // *******************************************************************
+        const firebaseConfig = {
+            apiKey: "AIzaSyCokj8lu7OEwynnteAT3iObnz8qbV1Hvwk",
+            authDomain: "centro-social-tecla-merlo.firebaseapp.com",
+            projectId: "centro-social-tecla-merlo",
+            storageBucket: "centro-social-tecla-merlo.firebasestorage.app",
+            messagingSenderId: "653126314182",
+            appId: "1:653126314182:web:8769015d8e5b3764aa4fc7",
+            measurementId: "G-MH4XF9W6XH"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = app.firestore();
+        window.db = db; // Torna o DB acessível ao gamificacao.js
+    </script>
+    
+    <script src="gamificacao.js"></script>
+
+    <script>
+        
+        // Função para mostrar feedback ao usuário
+        function showStatus(id, message, isSuccess = true) {
+            const element = document.getElementById(id);
+            element.textContent = message;
+            element.className = isSuccess ? 'message success' : 'message error';
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Função para alternar abas
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = "none";
+            }
+            const tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+            
+            // Recarrega os dados de gestão se a aba for aberta
+            if (tabName === 'GestaoDados') {
+                carregarDadosGestao();
+            }
+        }
+        
+        // =================================================================
+        // LÓGICA DE CARREGAMENTO DE DROPDOWNS
+        // =================================================================
+        
+        async function carregarTurmasDropdown(dropdownId) {
+            const selectTurmas = document.getElementById(dropdownId);
+            const turmas = await obterTurmas();
+
+            selectTurmas.innerHTML = '<option value="">-- Escolha a Turma --</option>'; 
+            
+            turmas.forEach(turma => {
+                const option = document.createElement('option');
+                option.value = turma.id;
+                option.textContent = turma.nome;
+                selectTurmas.appendChild(option);
+            });
+        }
+        
+        async function carregarAlunosPorTurma(turmaId) {
+            const selectAlunos = document.getElementById('selectAlunoPontuacao');
+            selectAlunos.innerHTML = '<option value="">-- Escolha o Aluno --</option>'; 
+
+            if (!turmaId) return;
+
+            try {
+                const alunos = await obterAlunosPorTurma(turmaId); 
+                
+                alunos.forEach(aluno => {
+                    const option = document.createElement('option');
+                    option.value = aluno.id;
+                    option.textContent = aluno.nome;
+                    selectAlunos.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar alunos filtrados:", error);
+            }
+        }
+
+        function carregarMissoesDropdown() {
+            const selectMissoes = document.getElementById('selectMissao');
+            const missoes = obterMissoes();
+            
+            selectMissoes.innerHTML = '<option value="">-- Escolha a Missão --</option>'; 
+
+            missoes.forEach(missao => {
+                const option = document.createElement('option');
+                // IMPORTANTE: Passamos o XP e o Badge como JSON string para o submit
+                option.value = JSON.stringify({ xp: missao.xp, badge: missao.badge });
+                option.textContent = `${missao.nome} (${missao.xp} XP)`;
+                selectMissoes.appendChild(option);
+            });
+        }
+        
+        // =================================================================
+        // LÓGICA DE GESTÃO DE DADOS (ACORDEÃO E AÇÕES)
+        // =================================================================
+
+        // Função para adicionar listeners (Acordeão e botões de CRUD)
+        function adicionarListenersGestao() {
+            // 1. Lógica do Acordeão (Mostrar/Ocultar lista de alunos)
+            document.querySelectorAll('.turma-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const list = this.nextElementSibling; 
+                    list.style.display = list.style.display === 'block' ? 'none' : 'block';
+                    this.parentElement.classList.toggle('expanded');
+                });
+            });
+
+            // 2. Listeners para os botões de Ação 
+            
+            // EXCLUIR TURMA (FUNCIONAL)
+            document.querySelectorAll('.delete-turma').forEach(btn => {
+                btn.addEventListener('click', async function(e) {
+                    e.stopPropagation(); 
+                    const id = this.dataset.id;
+                    const nome = this.dataset.nome;
+
+                    if (confirm(`Tem certeza que deseja EXCLUIR a turma "${nome}" e todos os seus alunos? Esta ação é irreversível!`)) {
+                        
+                        const resultado = await excluirTurma(id); 
+                        
+                        if (resultado.success) {
+                            showStatus('statusGestao', `✅ Turma "${nome}" excluída com sucesso!`, true);
+                            await carregarDadosGestao(); // Recarrega o Acordeão
+                            await carregarTurmasDropdown('selectTurmaCadastro'); // Recarrega dropdowns
+                            await carregarTurmasDropdown('selectTurmaPontuacao');
+                        } else {
+                            showStatus('statusGestao', `❌ Erro ao excluir turma: ${resultado.message}`, false);
+                        }
+                    }
+                });
+            });
+
+            // EDITAR TURMA (FUNCIONAL)
+            document.querySelectorAll('.edit-turma').forEach(btn => {
+                btn.addEventListener('click', async function(e) {
+                    e.stopPropagation(); 
+                    const id = this.dataset.id;
+                    const nomeAtual = this.dataset.nome;
+                    
+                    const turmaDoc = await db.collection("turmas").doc(id).get();
+                    if (!turmaDoc.exists) {
+                        showStatus('statusGestao', `❌ Erro: Turma não encontrada para edição.`, false);
+                        return;
+                    }
+                    const turmaData = turmaDoc.data();
+
+                    const novoNome = prompt(`Editar nome da turma "${nomeAtual}":`, turmaData.nome);
+                    if (!novoNome) return; 
+
+                    let novaMetaMensal = prompt(`Editar Meta Mensal de XP (atual: ${turmaData.metaMensal}):`, turmaData.metaMensal);
+                    if (novaMetaMensal === null) return;
+                    novaMetaMensal = parseInt(novaMetaMensal);
+                    if (isNaN(novaMetaMensal) || novaMetaMensal < 0) {
+                        showStatus('statusGestao', '❌ Edição cancelada: Meta deve ser um número positivo ou zero.', false);
+                        return;
+                    }
+
+                    const resultado = await editarTurma(id, novoNome, novaMetaMensal);
+
+                    if (resultado.success) {
+                        showStatus('statusGestao', `✅ Turma ${novoNome} editada com sucesso!`, true);
+                        await carregarDadosGestao(); // Recarrega o Acordeão
+                        await carregarTurmasDropdown('selectTurmaCadastro'); 
+                        await carregarTurmasDropdown('selectTurmaPontuacao');
+                    } else {
+                        showStatus('statusGestao', `❌ Erro ao editar turma: ${resultado.message}`, false);
+                    }
+                });
+            });
+
+            // EXCLUIR ALUNO (FUNCIONAL)
+            document.querySelectorAll('.delete-aluno').forEach(btn => {
+                btn.addEventListener('click', async function(e) {
+                    e.stopPropagation(); 
+                    const id = this.dataset.id;
+                    const nome = this.dataset.nome;
+                    
+                    if (confirm(`Tem certeza que deseja EXCLUIR o aluno "${nome}"?`)) {
+                        const resultado = await excluirAluno(id); 
+                        
+                        if (resultado.success) {
+                            showStatus('statusGestao', `✅ Aluno "${nome}" excluído com sucesso!`, true);
+                            await carregarDadosGestao(); // Recarrega o Acordeão e recalcula XP da turma
+                        } else {
+                            showStatus('statusGestao', `❌ Erro ao excluir aluno: ${resultado.message}`, false);
+                        }
+                    }
+                });
+            });
+
+            // EDITAR ALUNO (FUNCIONAL, usando prompts)
+            document.querySelectorAll('.edit-aluno').forEach(btn => {
+                btn.addEventListener('click', async function(e) {
+                    e.stopPropagation(); 
+                    const id = this.dataset.id;
+                    const nome = this.dataset.nome;
+                    
+                    // 1. Obter dados atuais do aluno
+                    const alunoDoc = await db.collection("alunos").doc(id).get();
+                    if (!alunoDoc.exists) {
+                        showStatus('statusGestao', `❌ Erro: Aluno não encontrado para edição.`, false);
+                        return;
+                    }
+                    const alunoData = alunoDoc.data();
+                    
+                    // --- 1. Novo Nome ---
+                    const novoNome = prompt(`Editar nome do aluno "${nome}":`, alunoData.nome);
+                    if (!novoNome) return; 
+
+                    // --- 2. Novo XP Total ---
+                    let novoXPTotal = prompt(`Editar XP total (atual: ${alunoData.xpTotal || 0}):`, alunoData.xpTotal || 0);
+                    if (novoXPTotal === null) return;
+                    novoXPTotal = parseInt(novoXPTotal);
+                    if (isNaN(novoXPTotal) || novoXPTotal < 0) {
+                        showStatus('statusGestao', '❌ Edição cancelada: XP deve ser um número positivo ou zero.', false);
+                        return;
+                    }
+
+                    // --- 3. Nova Turma ID (Guia o usuário com a lista) ---
+                    const turmas = await obterTurmas();
+                    const turmasList = turmas.map(t => `${t.nome} (ID: ${t.id})`).join('\n');
+                    
+                    let novaTurmaId = prompt(`Turmas cadastradas:\n${turmasList}\n\nDigite o ID da nova turma (atual: ${alunoData.turmaId}):`, alunoData.turmaId);
+                    if (!novaTurmaId) return;
+
+                    // Verificação se o ID da nova turma é válido
+                    if (!turmas.some(t => t.id === novaTurmaId)) {
+                        showStatus('statusGestao', `❌ Edição cancelada: ID de Turma "${novaTurmaId}" não encontrado.`, false);
+                        return;
+                    }
+
+                    const resultado = await editarAluno(id, novoNome, novaTurmaId, novoXPTotal);
+
+                    if (resultado.success) {
+                        showStatus('statusGestao', `✅ Aluno ${novoNome} editado com sucesso!`, true);
+                        await carregarDadosGestao(); // Recarrega o Acordeão
+                    } else {
+                        showStatus('statusGestao', `❌ Erro ao editar aluno: ${resultado.message}`, false);
+                    }
+                });
+            });
+        }
+
+        // Carrega todos os dados de turmas e alunos e monta o Acordeão
+        async function carregarDadosGestao() {
+            const accordionDiv = document.getElementById('accordionTurmas');
+            accordionDiv.innerHTML = '<p>Carregando...</p>';
+            
+            try {
+                const turmas = await obterTurmas();
+                
+                if (turmas.length === 0) {
+                    accordionDiv.innerHTML = '<p>Nenhuma turma cadastrada.</p>';
+                    return;
+                }
+
+                let html = '';
+                for (const turma of turmas) {
+                    const alunos = await obterAlunosPorTurma(turma.id); 
+                    
+                    html += `
+                        <div class="turma-item" data-turma-id="${turma.id}">
+                            <div class="turma-header">
+                                <span class="turma-name">${turma.nome} (XP: ${turma.xpAtual || 0})</span>
+                                <div class="turma-actions">
+                                    <button class="action-btn edit-turma" data-id="${turma.id}" data-nome="${turma.nome}" title="Editar Turma">✏️</button>
+                                    <button class="action-btn delete-turma" data-id="${turma.id}" data-nome="${turma.nome}" title="Excluir Turma">❌</button>
+                                </div>
+                            </div>
+                            <div class="aluno-list">
+                                ${alunos.length > 0 ? alunos.map(aluno => `
+                                    <div class="aluno-item">
+                                        <span class="aluno-name">${aluno.nome}</span> (XP: ${aluno.xpTotal || 0})
+                                        <div class="aluno-actions">
+                                            <button class="action-btn edit-aluno" data-id="${aluno.id}" data-turma-id="${turma.id}" data-nome="${aluno.nome}" title="Editar Aluno">✏️</button>
+                                            <button class="action-btn delete-aluno" data-id="${aluno.id}" data-turma-id="${turma.id}" data-nome="${aluno.nome}" title="Excluir Aluno">❌</button>
+                                        </div>
+                                    </div>
+                                `).join('') : '<p class="no-aluno">Nenhum aluno nesta turma.</p>'}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                accordionDiv.innerHTML = html;
+                adicionarListenersGestao();
+                
+            } catch (error) {
+                console.error("Erro ao carregar dados de gestão:", error);
+                accordionDiv.innerHTML = `<p class="message error">Erro ao carregar dados: ${error.message}</p>`;
+            }
+        }
+
+        // =================================================================
+        // LÓGICA DE INICIALIZAÇÃO DA PÁGINA
+        // =================================================================
+
+        async function inicializarPagina() {
+            await carregarTurmasDropdown('selectTurmaCadastro'); 
+            await carregarTurmasDropdown('selectTurmaPontuacao'); 
+            
+            const selectTurmaPontuacao = document.getElementById('selectTurmaPontuacao');
+            if (selectTurmaPontuacao) {
+                // Evento para carregar a lista de alunos quando a turma for selecionada
+                selectTurmaPontuacao.addEventListener('change', (e) => {
+                    carregarAlunosPorTurma(e.target.value); 
+                });
+            }
+
+            await carregarMissoesDropdown();
+            // Garante que a primeira aba esteja visível por padrão
+            document.getElementById('CadastroPontuacao').style.display = 'block';
+        }
+
+        // =================================================================
+        // LÓGICA DE SUBMISSÃO DE FORMULÁRIOS
+        // =================================================================
+
+        document.getElementById('formCadastrarTurma').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('nomeTurma').value;
+            const meta = document.getElementById('metaMensal').value;
+            const resultado = await cadastrarTurma(nome, meta);
+            
+            if (resultado.success) {
+                showStatus('statusTurma', `✅ Turma '${nome}' cadastrada!`, true);
+                document.getElementById('formCadastrarTurma').reset();
+                await carregarTurmasDropdown('selectTurmaCadastro');
+                await carregarTurmasDropdown('selectTurmaPontuacao');
+            } else {
+                showStatus('statusTurma', `❌ Erro: ${resultado.message}`, false);
+            }
+        });
+
+        // Lógica UNIFICADA e CORRIGIDA para Cadastro de Aluno
+        document.getElementById('formCadastrarAluno').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('nomeAluno').value;
+            const turmaId = document.getElementById('selectTurmaCadastro').value;
+            
+            if (!turmaId) {
+                showStatus('statusAluno', '❌ Selecione a Turma!', false);
+                return;
+            }
+
+            const resultado = await cadastrarAluno(nome, turmaId);
+            
+            if (resultado.success) {
+                showStatus('statusAluno', `✅ Aluno '${nome}' cadastrado!`, true);
+                document.getElementById('formCadastrarAluno').reset();
+                
+                // Atualiza o dropdown de Alunos para Pontuação
+                const turmaPontuacaoId = document.getElementById('selectTurmaPontuacao').value;
+                carregarAlunosPorTurma(turmaPontuacaoId);
+                
+                // 🟢 CORREÇÃO: FORÇA A RECARGA COMPLETA DO PAINEL DE GESTÃO
+                await carregarDadosGestao();
+                
+            } else {
+                showStatus('statusAluno', `❌ Erro: ${resultado.message}`, false);
+            }
+        });
+
+        // Lógica ADICIONADA/CORRIGIDA para Lançamento de Pontos
+        document.getElementById('formLancarPontos').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const turmaId = document.getElementById('selectTurmaPontuacao').value;
+            const alunoId = document.getElementById('selectAlunoPontuacao').value;
+            const missaoDataString = document.getElementById('selectMissao').value;
+            
+            if (!turmaId || !alunoId || !missaoDataString) {
+                showStatus('statusPontos', '❌ Por favor, selecione Turma, Aluno e Missão.', false);
+                return;
+            }
+            
+            try {
+                // Parseamos o JSON que salvamos no 'value' do dropdown de missões
+                const missaoData = JSON.parse(missaoDataString);
+                const xp = missaoData.xp;
+                const badge = missaoData.badge;
+                
+                // A função atualizarPontuacao no gamificacao.js já recalcula o XP da turma
+                const resultado = await atualizarPontuacao(alunoId, xp, badge);
+                
+                if (resultado.success) {
+                    showStatus('statusPontos', `✅ ${xp} XP lançado para o aluno!`, true);
+                    document.getElementById('formLancarPontos').reset();
+
+                    // Recarrega a lista de alunos na dropdown (caso o aluno tenha sido removido/adicionado)
+                    carregarAlunosPorTurma(turmaId);
+                    
+                    // Atualiza a lista de gestão (para refletir a mudança no XP)
+                    await carregarDadosGestao();
+                } else {
+                    showStatus('statusPontos', `❌ Erro ao lançar pontos: ${resultado.message}`, false);
+                }
+
+            } catch (error) {
+                showStatus('statusPontos', `❌ Erro de processamento: ${error.message}`, false);
+                console.error("Erro ao processar lançamento:", error);
+            }
+        });
+
+        // Inicializa a página ao carregar o DOM
+        document.addEventListener('DOMContentLoaded', inicializarPagina);
+    </script>
+</body>
+</html>

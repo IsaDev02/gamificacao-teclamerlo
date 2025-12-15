@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Ranking Geral de Gamificação</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #e6e6fa; /* Lavanda suave */ }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        h1 { color: #4b0082; /* Índigo */ text-align: center; border-bottom: 3px solid #8a2be2; padding-bottom: 10px; }
+        h2 { color: #8a2be2; /* Azul-violeta */ margin-top: 30px; }
+        p { color: black;}
+        
+        .ranking-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; }
+        .ranking-table th, .ranking-table td { border: 1px solid #ddd; padding: 12px; }
+        .ranking-table th { background-color: #8a2be2; color: white; }
+        
+        /* Estilos de Posição */
+        .ranking-table tbody tr:nth-child(1) td { background-color: gold; font-weight: bold; }
+        .ranking-table tbody tr:nth-child(2) td { background-color: silver; font-weight: bold; }
+        .ranking-table tbody tr:nth-child(3) td { background-color: #cd7f32; color: white; font-weight: bold; }
+        .ranking-table tr:nth-child(even) { background-color: #f8f0ff; }
+        
+        .xp-column { font-weight: bold; color: #5cb85c; }
+        
+        /* Estilo para links de volta */
+        .back-link { 
+            display: block; 
+            text-align: center; 
+            margin-top: 30px; 
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Ranking Geral de Gamificação</h1>
+        <p style="text-align: center;">Os rankings são atualizados em tempo real com base nos lançamentos feitos pelo Professor.</p>
+
+        <h2>Ranking de Alunos (Individual)</h2>
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Nome do Aluno</th>
+                    <th>Turma/Agência</th>
+                    <th>XP Total</th>
+                    <th>Badges Conquistados</th>
+                </tr>
+            </thead>
+            <tbody id="rankingIndividualBody">
+                <tr><td colspan="5">Carregando dados...</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Ranking de Turmas/Agências</h2>
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Nome da Turma</th>
+                    <th>XP Acumulado</th>
+                    <th>Meta Mensal</th>
+                </tr>
+            </thead>
+            <tbody id="rankingTurmasBody">
+                <tr><td colspan="4">Carregando dados...</td></tr>
+            </tbody>
+        </table>
+        
+        <p class="back-link"><a href="professor.html">Voltar ao Painel do Professor</a></p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script>
+        // *******************************************************************
+        // COPIE SUA CONFIGURAÇÃO COMPLETA E CORRETA AQUI
+        // *******************************************************************
+        const firebaseConfig = {
+            apiKey: "AIzaSyCokj8lu7OEwynnteAT3iObnz8qbV1Hvwk",
+            authDomain: "centro-social-tecla-merlo.firebaseapp.com",
+            projectId: "centro-social-tecla-merlo",
+            storageBucket: "centro-social-tecla-merlo.firebasestorage.app",
+            messagingSenderId: "653126314182",
+            appId: "1:653126314182:web:8769015d8e5b3764aa4fc7",
+            measurementId: "G-MH4XF9W6XH"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = app.firestore();
+        window.db = db; 
+    </script>
+    
+    <script src="gamificacao.js"></script>
+
+    <script>
+
+        // Mapeia IDs de turma para Nomes de Turma (para exibição)
+        let turmaMap = {};
+        
+        // Função para preencher o ranking de turmas
+        async function renderizarRankingTurmas(turmas) {
+            const tbody = document.getElementById('rankingTurmasBody');
+            tbody.innerHTML = '';
+            
+            if (turmas.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="4">Nenhuma turma encontrada.</td></tr>';
+                 return;
+            }
+
+            turmas.forEach((turma, index) => {
+                const row = tbody.insertRow();
+                const posicao = index + 1;
+                const xpFaltante = Math.max(0, turma.metaMensal - (turma.xpAtual || 0));
+
+                row.innerHTML = `
+                    <td>${posicao}º</td>
+                    <td>${turma.nome}</td>
+                    <td class="xp-column">${turma.xpAtual || 0} XP</td>
+                    <td>${turma.metaMensal} XP (Faltam: ${xpFaltante} XP)</td>
+                `;
+            });
+        }
+        
+        // Função para preencher o ranking individual
+        async function renderizarRankingIndividual(alunos) {
+            const tbody = document.getElementById('rankingIndividualBody');
+            tbody.innerHTML = '';
+            
+            if (alunos.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="5">Nenhum aluno encontrado.</td></tr>';
+                 return;
+            }
+
+            // Garante que o mapa de turmas seja carregado apenas uma vez
+            if (Object.keys(turmaMap).length === 0) {
+                // 'obterTurmas' deve estar exportado no gamificacao.js
+                const turmas = await obterTurmas(); 
+                turmaMap = turmas.reduce((map, t) => {
+                    map[t.id] = t.nome;
+                    return map;
+                }, {});
+            }
+
+            alunos.forEach((aluno, index) => {
+                const row = tbody.insertRow();
+                const posicao = index + 1;
+                const nomeTurma = turmaMap[aluno.turmaId] || 'Não Associada';
+                
+                row.innerHTML = `
+                    <td>${posicao}º</td>
+                    <td>${aluno.nome}</td>
+                    <td>${nomeTurma}</td>
+                    <td class="xp-column">${aluno.xpTotal || 0} XP</td>
+                    <td>${aluno.badges && aluno.badges.length > 0 ? aluno.badges.join(', ') : '-'}</td>
+                `;
+            });
+        }
+
+        // Função de inicialização
+        async function inicializarRankings() {
+            try {
+                // 1. Gera e renderiza o ranking de turmas (CORRIGIDO O NOME DA FUNÇÃO)
+                // 'obterRankingTurmasGeral' deve estar exportado no gamificacao.js
+                const rankingTurmas = await obterRankingTurmasGeral(); 
+                renderizarRankingTurmas(rankingTurmas);
+
+                // 2. Gera e renderiza o ranking individual (CORRIGIDO O NOME DA FUNÇÃO)
+                // 'obterRankingAlunosGeral' deve estar exportado no gamificacao.js
+                const rankingIndividual = await obterRankingAlunosGeral();
+                await renderizarRankingIndividual(rankingIndividual);
+                
+            } catch (error) {
+                console.error("Erro fatal ao carregar rankings:", error);
+                
+                // Mensagem de erro amigável, indicando o problema real
+                document.getElementById('rankingIndividualBody').innerHTML = '<tr><td colspan="5" style="color: red; font-weight: bold;">❌ Erro ao carregar alunos. Verifique os índices do Firebase (xpTotal + nome).</td></tr>';
+                document.getElementById('rankingTurmasBody').innerHTML = '<tr><td colspan="4" style="color: red; font-weight: bold;">❌ Erro ao carregar turmas. Verifique os índices do Firebase (xpAtual + nome).</td></tr>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', inicializarRankings);
+    </script>
+</body>
+</html>

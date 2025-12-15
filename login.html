@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Acesso ao Ranking</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; 
+            background-image: url(fundo.webp); 
+            display: flex; justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+             }
+        .login-box { 
+            padding: 40px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center;
+        }
+        h1 { color: #2446dd; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #ffffff; }
+        input[type="text"] { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+        }
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background-color: #79bfe7; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 1em;
+            font-weight: bold;
+        }
+        button:hover { background-color: #2446dd; }
+        .message { margin-top: 15px; padding: 10px; border-radius: 5px; font-weight: bold; display: none; }
+        .error { background-color: #f2dede; color: #a94442; }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h1>🔐 Acessar Ranking </h1>
+        <form id="formAcesso">
+            <div class="form-group">
+                <label for="codigoTurma">Digite o ID da sua Turma:</label>
+                <input type="text" id="codigoTurma" required placeholder="Ex: Agência Alpha">
+            </div>
+            <button type="submit">Acessar</button>
+            <div id="statusMessage" class="message error"></div>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script>
+        // *******************************************************************
+        // COPIE SUA CONFIGURAÇÃO COMPLETA E CORRETA AQUI
+        // *******************************************************************
+        const firebaseConfig = {
+    apiKey: "AIzaSyCokj8lu7OEwynnteAT3iObnz8qbV1Hvwk",
+    authDomain: "centro-social-tecla-merlo.firebaseapp.com",
+    projectId: "centro-social-tecla-merlo",
+    storageBucket: "centro-social-tecla-merlo.firebasestorage.app",
+    messagingSenderId: "653126314182",
+    appId: "1:653126314182:web:8769015d8e5b3764aa4fc7",
+    measurementId: "G-MH4XF9W6XH"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = app.firestore();
+        window.db = db; 
+    </script>
+
+    <script>
+
+        const form = document.getElementById('formAcesso');
+        const inputCodigo = document.getElementById('codigoTurma');
+        const statusMessage = document.getElementById('statusMessage');
+
+        function showMessage(message, type = 'error') {
+            statusMessage.textContent = message;
+            statusMessage.className = `message ${type}`;
+            statusMessage.style.display = 'block';
+            setTimeout(() => statusMessage.style.display = 'none', 5000);
+        }
+
+        /**
+         * Busca o ID da turma pelo nome e redireciona.
+         */
+        async function buscarTurmaERedirecionar(nomeTurma) {
+            
+            // Normaliza o nome para evitar problemas de capitalização (ex: "alpha" vs "Alpha")
+            const nomeNormalizado = nomeTurma.trim(); 
+            
+            if (nomeNormalizado.length === 0) {
+                 showMessage("Por favor, digite o código da turma.");
+                 return;
+            }
+
+            try {
+                // Query: Busca na coleção 'turmas' onde o campo 'nome' é igual ao valor digitado.
+                // Usamos toUpperCase() para forçar a comparação a ser case-insensitive (se você usou letras maiúsculas no cadastro)
+                // Se seus dados foram cadastrados com letras diferentes (ex: "Alpha" vs "alpha"), 
+                // você precisará garantir que a capitalização seja a mesma.
+                const snapshot = await db.collection("turmas")
+                    .where("nome", "==", nomeNormalizado) 
+                    .limit(1) // Só precisamos do primeiro resultado
+                    .get();
+
+                if (!snapshot.empty) {
+                    // Turma encontrada!
+                    const turmaDoc = snapshot.docs[0];
+                    const turmaId = turmaDoc.id; // Este é o ID do documento que precisamos
+                    
+                    // Redireciona para o template de ranking com o ID filtrado
+                    window.location.href = `ranking_turma.html?turmaId=${turmaId}`;
+                } else {
+                    showMessage(`Turma "${nomeNormalizado}" não encontrada. Verifique o código.`);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar turma:", error);
+                showMessage("Erro de conexão. Tente novamente ou verifique o console.");
+            }
+        }
+
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nomeTurma = inputCodigo.value;
+            buscarTurmaERedirecionar(nomeTurma);
+        });
+
+    </script>
+</body>
+</html>
