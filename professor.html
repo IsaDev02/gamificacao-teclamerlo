@@ -2,519 +2,318 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Professor - Painel de Controle e Gestão</title>
-    <link rel="stylesheet" href="style.css"> 
+    <title>Painel do Professor - Área Restrita</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
+        
+        /* Fundo animado em degradê */
+#lock-screen {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(-45deg, #4b0082, #8a2be2, #240b36, #c71585);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* O Box de Login (Card) */
+.login-box {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    text-align: center;
+    width: 320px;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.login-box .icon-lock {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.login-box h2 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.login-box p {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    outline: none;
+    transition: 0.3s;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.login-box input:focus {
+    border-color: #4b0082;
+    box-shadow: 0 0 10px rgba(75, 0, 130, 0.1);
+}
+
+#erroSenha {
+    color: #ff4d4d;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    font-weight: bold;
+    display: none;
+}
+
+        /* --- Layout do Painel --- */
+        .container { max-width: 1100px; margin: auto; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        h1, h2 { color: #4b0082; margin-top: 0; }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        .tab-btn { padding: 12px 25px; cursor: pointer; border: none; background: #e0e0e0; border-radius: 8px; font-weight: bold; transition: 0.3s; }
+        .tab-btn.active { background: #4b0082; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+        
+        .grid-pontos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
+        .negative-label { color: #d9534f; }
+
+        /* --- Tabela de Campeonato --- */
+        .turma-card-gestao { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 25px; overflow: hidden; }
+        .turma-header-gestao { background: #f8f9fa; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4b0082; }
+        .tabela-alunos-gestao { width: 100%; border-collapse: collapse; }
+        .tabela-alunos-gestao th { text-align: center; background: #fdfdfd; padding: 12px; font-size: 0.8rem; color: #888; text-transform: uppercase; border-bottom: 1px solid #eee; }
+        .tabela-alunos-gestao td { padding: 12px; border-top: 1px solid #eee; text-align: center; }
+        .tabela-alunos-gestao td:first-child { text-align: left; }
+
+        .btn-principal { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 6px; width: 100%; cursor: pointer; font-size: 1rem; font-weight: bold; }
+        .btn-coletivo { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-delete-aluno { background: none; border: 1px solid #ff4d4d; color: #ff4d4d; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .btn-delete-turma { background: #ff4d4d; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+        .xp-acumulado { background: #f4f4f4; font-weight: bold; }
+    </style>
 </head>
 <body>
+
+<div id="lock-screen">
+    <div class="login-box">
+        <div class="icon-lock"> 🔐 </div>
+        <h2>Acesso Restrito</h2>
+        <p>Área exclusiva do Professor</p>
+        
+        <input type="password" id="inputSenha" 
+               onkeyup="verificarSenha(event)" 
+               placeholder="Digite sua senha">
+               
+        <p id="erroSenha">⚠️ Senha incorreta. Tente novamente.</p>
+        
+        <div style="margin-top: 20px; font-size: 0.7rem; color: #aaa;">
+            Centro Social Irmã Tecla Merlo &copy; 2025
+        </div>
+    </div>
+</div>
+
+<div id="conteudo-painel" class="hidden-content">
     <div class="container">
-        <h1>💻 Área do Professor</h1>
-        <p style="text-align: center;">Área de controle para cadastro de turmas/alunos e lançamento de pontuações.</p>
+        <h1>👨‍🏫 Painel do Professor</h1>
 
         <div class="tabs">
-            <button class="tab-button active" onclick="openTab(event, 'CadastroPontuacao')">Cadastro e Pontuação</button>
-            <button class="tab-button" onclick="openTab(event, 'GestaoDados')">Gestão de Dados</button>
-        </div>
-        
-        <div id="CadastroPontuacao" class="tab-content active">
-
-            <h2>📖 Cadastrar Nova Turma</h2>
-            <form id="formCadastrarTurma">
-                <div class="form-group">
-                    <label for="nomeTurma">Nome da Turma:</label>
-                    <input type="text" id="nomeTurma" required placeholder="Ex: Agência Alpha">
-                </div>
-                <div class="form-group">
-                    <label for="metaMensal">Meta Mensal de XP (Ex: 10000):</label>
-                    <input type="number" id="metaMensal" required placeholder="Mínimo de XP para o mês">
-                </div>
-                <button type="submit">Cadastrar Turma</button>
-                <p id="statusTurma" class="message success" style="display: none;"></p>
-            </form>
-
-            <hr>
-            
-            <h2>📖 Cadastrar Novo Aluno</h2>
-            <form id="formCadastrarAluno">
-                <div class="form-group">
-                    <label for="selectTurmaCadastro">Selecionar Turma:</label>
-                    <select id="selectTurmaCadastro" required>
-                        <option value="">-- Escolha a Turma --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="nomeAluno">Nome do Aluno:</label>
-                    <input type="text" id="nomeAluno" required placeholder="Ex: João da Silva">
-                </div>
-                <button type="submit">Cadastrar Aluno</button>
-                <p id="statusAluno" class="message success" style="display: none;"></p>
-            </form>
-
-            <hr>
-
-            <h2>✨ Lançamento de Pontos (Missões)</h2>
-            <form id="formLancarPontos">
-                
-                <div class="form-group">
-                    <label for="selectTurmaPontuacao">1. Selecionar Turma:</label>
-                    <select id="selectTurmaPontuacao" required> 
-                        <option value="">-- Escolha a Turma --</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="selectAlunoPontuacao">2. Selecionar Aluno:</label>
-                    <select id="selectAlunoPontuacao" required>
-                        <option value="">-- Escolha a Turma primeiro --</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="selectMissao">3. Selecionar Missão/Atividade:</label>
-                    <select id="selectMissao" required>
-                        <option value="">-- Escolha a Missão --</option>
-                    </select>
-                </div>
-                <button type="submit">Lançar Pontuação</button>
-                <p id="statusPontos" class="message success" style="display: none;"></p>
-            </form>
-
+            <button class="tab-btn active" onclick="switchTab(event, 'tab-pontos')">Lançar Pontos</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-cadastro')">Novos Cadastros</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-gestao')">Gestão de Dados</button>
         </div>
 
-        <div id="GestaoDados" class="tab-content">
-            <h2>📊 Gestão de Turmas e Alunos</h2>
-            <p>Clique no nome da turma para expandir e ver os alunos. Use os ícones para editar (✏️) ou excluir (❌).</p>
-            
-            <div id="accordionTurmas">
-                <p>Carregando dados de gestão...</p>
+        <div id="tab-pontos" class="tab-content active">
+            <div class="card">
+                <h2>🎯 Lançamento Individual</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+                    <div>
+                        <label>Turma:</label>
+                        <select id="selTurmaPonto" onchange="carregarAlunosParaPonto(this.value)"><option value="">Carregando...</option></select>
+                    </div>
+                    <div>
+                        <label>Aluno:</label>
+                        <select id="selAlunoPonto"><option value="">Selecione a turma...</option></select>
+                    </div>
+                </div>
+                <div class="grid-pontos">
+                    <div><label>Missão (+):</label><select id="selMissao"><option value="0">Nenhuma</option></select></div>
+                    <div><label>Extra (+):</label><select id="selExtra"><option value="0">Nenhum</option><option value="50">Presença (+50 XP)</option><option value="100">Participação (+100 XP)</option></select></div>
+                    <div><label class="negative-label">Penalidade (-):</label><select id="selPenalidade"><option value="0">Nenhuma</option><option value="-50">Falta (-50 XP)</option><option value="-100">Comportamento (-100 XP)</option></select></div>
+                </div>
+                <button class="btn-principal" style="margin-top:15px;" onclick="handleLancarIndividual()">Confirmar Pontos</button>
             </div>
-            
-            <p id="statusGestao" class="message success" style="display: none;"></p>
+
+            <div class="card" style="border-top: 5px solid #28a745;">
+                <h2>🚀 Chamada e Missão Coletiva</h2>
+                <label>Selecione a Turma:</label>
+                <select id="selTurmaColetiva" onchange="gerarListaColetiva(this.value)" style="margin-bottom:15px;"><option value="">Selecione...</option></select>
+
+                <div id="containerColetivo" style="display:none;">
+                    <div style="background: #e9f7ef; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; gap: 10px; align-items: flex-end;">
+                        <div style="flex: 1;"><label>Missão Grupo:</label><select id="selMissaoColetiva"><option value="0">Nenhuma</option></select></div>
+                        <div style="flex: 1;"><label>Extra Grupo:</label><select id="selExtraColetiva"><option value="0">Nenhum</option><option value="50">Presença (+50 XP)</option></select></div>
+                        <button class="btn-coletivo" onclick="handleLancarColetivo()">Lançar p/ Selecionados</button>
+                    </div>
+                    <table class="tabela-alunos-gestao">
+                        <thead><tr><th width="40"><input type="checkbox" onclick="marcarTodos(this.checked)"></th><th style="text-align:left;">Nome do Aluno</th><th>XP Atual</th></tr></thead>
+                        <tbody id="listaAlunosColetivo"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
-        <p style="margin-top: 40px; text-align: center;"><a href="ranking_geral.html">Ver Ranking Geral (Visão Professor)</a></p>
+        <div id="tab-cadastro" class="tab-content">
+            <div class="card">
+                <h2>Nova Turma</h2>
+                <input type="text" id="nomeTurma" placeholder="Nome da Turma" style="margin-bottom:10px;">
+                <input type="number" id="metaTurma" placeholder="Meta de XP Mensal" style="margin-bottom:10px;">
+                <button class="btn-principal" onclick="handleNovaTurma()">Criar Turma</button>
+            </div>
+            <div class="card">
+                <h2>Novo Aluno</h2>
+                <input type="text" id="nomeAluno" placeholder="Nome do Aluno" style="margin-bottom:10px;">
+                <select id="selTurmaCadastro" style="margin-bottom:10px;"><option value="">Selecione...</option></select>
+                <button class="btn-principal" onclick="handleNovoAluno()">Cadastrar Aluno</button>
+            </div>
+        </div>
+
+        <div id="tab-gestao" class="tab-content">
+            <div id="listaGestao"></div>
+        </div>
     </div>
+</div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-    <script>
-        // *******************************************************************
-        // COPIE SUA CONFIGURAÇÃO COMPLETA E CORRETA AQUI
-        // *******************************************************************
-        const firebaseConfig = {
-            apiKey: "AIzaSyCokj8lu7OEwynnteAT3iObnz8qbV1Hvwk",
-            authDomain: "centro-social-tecla-merlo.firebaseapp.com",
-            projectId: "centro-social-tecla-merlo",
-            storageBucket: "centro-social-tecla-merlo.firebasestorage.app",
-            messagingSenderId: "653126314182",
-            appId: "1:653126314182:web:8769015d8e5b3764aa4fc7",
-            measurementId: "G-MH4XF9W6XH"
-        };
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = app.firestore();
-        window.db = db; // Torna o DB acessível ao gamificacao.js
-    </script>
-    
-    <script src="gamificacao.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCokj8lu7OEwynnteAT3iObnz8qbV1Hvwk",
+        authDomain: "centro-social-tecla-merlo.firebaseapp.com",
+        projectId: "centro-social-tecla-merlo",
+        storageBucket: "centro-social-tecla-merlo.firebasestorage.app",
+        messagingSenderId: "653126314182",
+        appId: "1:653126314182:web:8769015d8e5b3764aa4fc7"
+    };
+    firebase.initializeApp(firebaseConfig);
+    window.db = firebase.firestore();
+</script>
+<script src="gamificacao.js"></script>
 
-    <script>
-        
-        // Função para mostrar feedback ao usuário
-        function showStatus(id, message, isSuccess = true) {
-            const element = document.getElementById(id);
-            element.textContent = message;
-            element.className = isSuccess ? 'message success' : 'message error';
-            element.style.display = 'block';
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 5000);
-        }
-
-        // Função para alternar abas
-        function openTab(evt, tabName) {
-            const tabContents = document.getElementsByClassName("tab-content");
-            for (let i = 0; i < tabContents.length; i++) {
-                tabContents[i].style.display = "none";
-            }
-            const tabButtons = document.getElementsByClassName("tab-button");
-            for (let i = 0; i < tabButtons.length; i++) {
-                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
-            }
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
-            
-            // Recarrega os dados de gestão se a aba for aberta
-            if (tabName === 'GestaoDados') {
-                carregarDadosGestao();
-            }
-        }
-        
-        // =================================================================
-        // LÓGICA DE CARREGAMENTO DE DROPDOWNS
-        // =================================================================
-        
-        async function carregarTurmasDropdown(dropdownId) {
-            const selectTurmas = document.getElementById(dropdownId);
-            const turmas = await obterTurmas();
-
-            selectTurmas.innerHTML = '<option value="">-- Escolha a Turma --</option>'; 
-            
-            turmas.forEach(turma => {
-                const option = document.createElement('option');
-                option.value = turma.id;
-                option.textContent = turma.nome;
-                selectTurmas.appendChild(option);
-            });
-        }
-        
-        async function carregarAlunosPorTurma(turmaId) {
-            const selectAlunos = document.getElementById('selectAlunoPontuacao');
-            selectAlunos.innerHTML = '<option value="">-- Escolha o Aluno --</option>'; 
-
-            if (!turmaId) return;
-
-            try {
-                const alunos = await obterAlunosPorTurma(turmaId); 
-                
-                alunos.forEach(aluno => {
-                    const option = document.createElement('option');
-                    option.value = aluno.id;
-                    option.textContent = aluno.nome;
-                    selectAlunos.appendChild(option);
-                });
-
-            } catch (error) {
-                console.error("Erro ao carregar alunos filtrados:", error);
-            }
-        }
-
-        function carregarMissoesDropdown() {
-            const selectMissoes = document.getElementById('selectMissao');
-            const missoes = obterMissoes();
-            
-            selectMissoes.innerHTML = '<option value="">-- Escolha a Missão --</option>'; 
-
-            missoes.forEach(missao => {
-                const option = document.createElement('option');
-                // IMPORTANTE: Passamos o XP e o Badge como JSON string para o submit
-                option.value = JSON.stringify({ xp: missao.xp, badge: missao.badge });
-                option.textContent = `${missao.nome} (${missao.xp} XP)`;
-                selectMissoes.appendChild(option);
-            });
-        }
-        
-        // =================================================================
-        // LÓGICA DE GESTÃO DE DADOS (ACORDEÃO E AÇÕES)
-        // =================================================================
-
-        // Função para adicionar listeners (Acordeão e botões de CRUD)
-        function adicionarListenersGestao() {
-            // 1. Lógica do Acordeão (Mostrar/Ocultar lista de alunos)
-            document.querySelectorAll('.turma-header').forEach(header => {
-                header.addEventListener('click', function() {
-                    const list = this.nextElementSibling; 
-                    list.style.display = list.style.display === 'block' ? 'none' : 'block';
-                    this.parentElement.classList.toggle('expanded');
-                });
-            });
-
-            // 2. Listeners para os botões de Ação 
-            
-            // EXCLUIR TURMA (FUNCIONAL)
-            document.querySelectorAll('.delete-turma').forEach(btn => {
-                btn.addEventListener('click', async function(e) {
-                    e.stopPropagation(); 
-                    const id = this.dataset.id;
-                    const nome = this.dataset.nome;
-
-                    if (confirm(`Tem certeza que deseja EXCLUIR a turma "${nome}" e todos os seus alunos? Esta ação é irreversível!`)) {
-                        
-                        const resultado = await excluirTurma(id); 
-                        
-                        if (resultado.success) {
-                            showStatus('statusGestao', `✅ Turma "${nome}" excluída com sucesso!`, true);
-                            await carregarDadosGestao(); // Recarrega o Acordeão
-                            await carregarTurmasDropdown('selectTurmaCadastro'); // Recarrega dropdowns
-                            await carregarTurmasDropdown('selectTurmaPontuacao');
-                        } else {
-                            showStatus('statusGestao', `❌ Erro ao excluir turma: ${resultado.message}`, false);
-                        }
-                    }
-                });
-            });
-
-            // EDITAR TURMA (FUNCIONAL)
-            document.querySelectorAll('.edit-turma').forEach(btn => {
-                btn.addEventListener('click', async function(e) {
-                    e.stopPropagation(); 
-                    const id = this.dataset.id;
-                    const nomeAtual = this.dataset.nome;
-                    
-                    const turmaDoc = await db.collection("turmas").doc(id).get();
-                    if (!turmaDoc.exists) {
-                        showStatus('statusGestao', `❌ Erro: Turma não encontrada para edição.`, false);
-                        return;
-                    }
-                    const turmaData = turmaDoc.data();
-
-                    const novoNome = prompt(`Editar nome da turma "${nomeAtual}":`, turmaData.nome);
-                    if (!novoNome) return; 
-
-                    let novaMetaMensal = prompt(`Editar Meta Mensal de XP (atual: ${turmaData.metaMensal}):`, turmaData.metaMensal);
-                    if (novaMetaMensal === null) return;
-                    novaMetaMensal = parseInt(novaMetaMensal);
-                    if (isNaN(novaMetaMensal) || novaMetaMensal < 0) {
-                        showStatus('statusGestao', '❌ Edição cancelada: Meta deve ser um número positivo ou zero.', false);
-                        return;
-                    }
-
-                    const resultado = await editarTurma(id, novoNome, novaMetaMensal);
-
-                    if (resultado.success) {
-                        showStatus('statusGestao', `✅ Turma ${novoNome} editada com sucesso!`, true);
-                        await carregarDadosGestao(); // Recarrega o Acordeão
-                        await carregarTurmasDropdown('selectTurmaCadastro'); 
-                        await carregarTurmasDropdown('selectTurmaPontuacao');
-                    } else {
-                        showStatus('statusGestao', `❌ Erro ao editar turma: ${resultado.message}`, false);
-                    }
-                });
-            });
-
-            // EXCLUIR ALUNO (FUNCIONAL)
-            document.querySelectorAll('.delete-aluno').forEach(btn => {
-                btn.addEventListener('click', async function(e) {
-                    e.stopPropagation(); 
-                    const id = this.dataset.id;
-                    const nome = this.dataset.nome;
-                    
-                    if (confirm(`Tem certeza que deseja EXCLUIR o aluno "${nome}"?`)) {
-                        const resultado = await excluirAluno(id); 
-                        
-                        if (resultado.success) {
-                            showStatus('statusGestao', `✅ Aluno "${nome}" excluído com sucesso!`, true);
-                            await carregarDadosGestao(); // Recarrega o Acordeão e recalcula XP da turma
-                        } else {
-                            showStatus('statusGestao', `❌ Erro ao excluir aluno: ${resultado.message}`, false);
-                        }
-                    }
-                });
-            });
-
-            // EDITAR ALUNO (FUNCIONAL, usando prompts)
-            document.querySelectorAll('.edit-aluno').forEach(btn => {
-                btn.addEventListener('click', async function(e) {
-                    e.stopPropagation(); 
-                    const id = this.dataset.id;
-                    const nome = this.dataset.nome;
-                    
-                    // 1. Obter dados atuais do aluno
-                    const alunoDoc = await db.collection("alunos").doc(id).get();
-                    if (!alunoDoc.exists) {
-                        showStatus('statusGestao', `❌ Erro: Aluno não encontrado para edição.`, false);
-                        return;
-                    }
-                    const alunoData = alunoDoc.data();
-                    
-                    // --- 1. Novo Nome ---
-                    const novoNome = prompt(`Editar nome do aluno "${nome}":`, alunoData.nome);
-                    if (!novoNome) return; 
-
-                    // --- 2. Novo XP Total ---
-                    let novoXPTotal = prompt(`Editar XP total (atual: ${alunoData.xpTotal || 0}):`, alunoData.xpTotal || 0);
-                    if (novoXPTotal === null) return;
-                    novoXPTotal = parseInt(novoXPTotal);
-                    if (isNaN(novoXPTotal) || novoXPTotal < 0) {
-                        showStatus('statusGestao', '❌ Edição cancelada: XP deve ser um número positivo ou zero.', false);
-                        return;
-                    }
-
-                    // --- 3. Nova Turma ID (Guia o usuário com a lista) ---
-                    const turmas = await obterTurmas();
-                    const turmasList = turmas.map(t => `${t.nome} (ID: ${t.id})`).join('\n');
-                    
-                    let novaTurmaId = prompt(`Turmas cadastradas:\n${turmasList}\n\nDigite o ID da nova turma (atual: ${alunoData.turmaId}):`, alunoData.turmaId);
-                    if (!novaTurmaId) return;
-
-                    // Verificação se o ID da nova turma é válido
-                    if (!turmas.some(t => t.id === novaTurmaId)) {
-                        showStatus('statusGestao', `❌ Edição cancelada: ID de Turma "${novaTurmaId}" não encontrado.`, false);
-                        return;
-                    }
-
-                    const resultado = await editarAluno(id, novoNome, novaTurmaId, novoXPTotal);
-
-                    if (resultado.success) {
-                        showStatus('statusGestao', `✅ Aluno ${novoNome} editado com sucesso!`, true);
-                        await carregarDadosGestao(); // Recarrega o Acordeão
-                    } else {
-                        showStatus('statusGestao', `❌ Erro ao editar aluno: ${resultado.message}`, false);
-                    }
-                });
-            });
-        }
-
-        // Carrega todos os dados de turmas e alunos e monta o Acordeão
-        async function carregarDadosGestao() {
-            const accordionDiv = document.getElementById('accordionTurmas');
-            accordionDiv.innerHTML = '<p>Carregando...</p>';
-            
-            try {
-                const turmas = await obterTurmas();
-                
-                if (turmas.length === 0) {
-                    accordionDiv.innerHTML = '<p>Nenhuma turma cadastrada.</p>';
-                    return;
-                }
-
-                let html = '';
-                for (const turma of turmas) {
-                    const alunos = await obterAlunosPorTurma(turma.id); 
-                    
-                    html += `
-                        <div class="turma-item" data-turma-id="${turma.id}">
-                            <div class="turma-header">
-                                <span class="turma-name">${turma.nome} (XP: ${turma.xpAtual || 0})</span>
-                                <div class="turma-actions">
-                                    <button class="action-btn edit-turma" data-id="${turma.id}" data-nome="${turma.nome}" title="Editar Turma">✏️</button>
-                                    <button class="action-btn delete-turma" data-id="${turma.id}" data-nome="${turma.nome}" title="Excluir Turma">❌</button>
-                                </div>
-                            </div>
-                            <div class="aluno-list">
-                                ${alunos.length > 0 ? alunos.map(aluno => `
-                                    <div class="aluno-item">
-                                        <span class="aluno-name">${aluno.nome}</span> (XP: ${aluno.xpTotal || 0})
-                                        <div class="aluno-actions">
-                                            <button class="action-btn edit-aluno" data-id="${aluno.id}" data-turma-id="${turma.id}" data-nome="${aluno.nome}" title="Editar Aluno">✏️</button>
-                                            <button class="action-btn delete-aluno" data-id="${aluno.id}" data-turma-id="${turma.id}" data-nome="${aluno.nome}" title="Excluir Aluno">❌</button>
-                                        </div>
-                                    </div>
-                                `).join('') : '<p class="no-aluno">Nenhum aluno nesta turma.</p>'}
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                accordionDiv.innerHTML = html;
-                adicionarListenersGestao();
-                
-            } catch (error) {
-                console.error("Erro ao carregar dados de gestão:", error);
-                accordionDiv.innerHTML = `<p class="message error">Erro ao carregar dados: ${error.message}</p>`;
-            }
-        }
-
-        // =================================================================
-        // LÓGICA DE INICIALIZAÇÃO DA PÁGINA
-        // =================================================================
-
-        async function inicializarPagina() {
-            await carregarTurmasDropdown('selectTurmaCadastro'); 
-            await carregarTurmasDropdown('selectTurmaPontuacao'); 
-            
-            const selectTurmaPontuacao = document.getElementById('selectTurmaPontuacao');
-            if (selectTurmaPontuacao) {
-                // Evento para carregar a lista de alunos quando a turma for selecionada
-                selectTurmaPontuacao.addEventListener('change', (e) => {
-                    carregarAlunosPorTurma(e.target.value); 
-                });
-            }
-
-            await carregarMissoesDropdown();
-            // Garante que a primeira aba esteja visível por padrão
-            document.getElementById('CadastroPontuacao').style.display = 'block';
-        }
-
-        // =================================================================
-        // LÓGICA DE SUBMISSÃO DE FORMULÁRIOS
-        // =================================================================
-
-        document.getElementById('formCadastrarTurma').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nome = document.getElementById('nomeTurma').value;
-            const meta = document.getElementById('metaMensal').value;
-            const resultado = await cadastrarTurma(nome, meta);
-            
-            if (resultado.success) {
-                showStatus('statusTurma', `✅ Turma '${nome}' cadastrada!`, true);
-                document.getElementById('formCadastrarTurma').reset();
-                await carregarTurmasDropdown('selectTurmaCadastro');
-                await carregarTurmasDropdown('selectTurmaPontuacao');
+<script>
+    // --- SEGURANÇA ---
+    function verificarSenha(event) {
+        if (event.key === "Enter") {
+            const senha = document.getElementById('inputSenha').value;
+            if (senha === "192837") { // <--- Altere sua senha aqui
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('conteudo-painel').classList.remove('hidden-content');
+                init();
             } else {
-                showStatus('statusTurma', `❌ Erro: ${resultado.message}`, false);
+                document.getElementById('erroSenha').style.display = 'block';
+                document.getElementById('inputSenha').value = '';
             }
+        }
+    }
+
+    // --- NAVEGAÇÃO ---
+    function switchTab(evt, tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        if(tabId === 'tab-gestao') carregarGestao();
+    }
+
+    // --- LÓGICA DO PAINEL ---
+    async function init() {
+        const turmas = await obterTurmas();
+        ['selTurmaPonto', 'selTurmaCadastro', 'selTurmaColetiva'].forEach(id => {
+            const el = document.getElementById(id);
+            el.innerHTML = '<option value="">Selecione...</option>';
+            turmas.forEach(t => el.innerHTML += `<option value="${t.id}">${t.nome}</option>`);
         });
-
-        // Lógica UNIFICADA e CORRIGIDA para Cadastro de Aluno
-        document.getElementById('formCadastrarAluno').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nome = document.getElementById('nomeAluno').value;
-            const turmaId = document.getElementById('selectTurmaCadastro').value;
-            
-            if (!turmaId) {
-                showStatus('statusAluno', '❌ Selecione a Turma!', false);
-                return;
-            }
-
-            const resultado = await cadastrarAluno(nome, turmaId);
-            
-            if (resultado.success) {
-                showStatus('statusAluno', `✅ Aluno '${nome}' cadastrado!`, true);
-                document.getElementById('formCadastrarAluno').reset();
-                
-                // Atualiza o dropdown de Alunos para Pontuação
-                const turmaPontuacaoId = document.getElementById('selectTurmaPontuacao').value;
-                carregarAlunosPorTurma(turmaPontuacaoId);
-                
-                // 🟢 CORREÇÃO: FORÇA A RECARGA COMPLETA DO PAINEL DE GESTÃO
-                await carregarDadosGestao();
-                
-            } else {
-                showStatus('statusAluno', `❌ Erro: ${resultado.message}`, false);
-            }
+        const missoes = obterMissoes();
+        ['selMissao', 'selMissaoColetiva'].forEach(id => {
+            const el = document.getElementById(id);
+            missoes.forEach(m => el.innerHTML += `<option value="${m.xp}">${m.nome} (+${m.xp})</option>`);
         });
+    }
 
-        // Lógica ADICIONADA/CORRIGIDA para Lançamento de Pontos
-        document.getElementById('formLancarPontos').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const turmaId = document.getElementById('selectTurmaPontuacao').value;
-            const alunoId = document.getElementById('selectAlunoPontuacao').value;
-            const missaoDataString = document.getElementById('selectMissao').value;
-            
-            if (!turmaId || !alunoId || !missaoDataString) {
-                showStatus('statusPontos', '❌ Por favor, selecione Turma, Aluno e Missão.', false);
-                return;
-            }
-            
-            try {
-                // Parseamos o JSON que salvamos no 'value' do dropdown de missões
-                const missaoData = JSON.parse(missaoDataString);
-                const xp = missaoData.xp;
-                const badge = missaoData.badge;
-                
-                // A função atualizarPontuacao no gamificacao.js já recalcula o XP da turma
-                const resultado = await atualizarPontuacao(alunoId, xp, badge);
-                
-                if (resultado.success) {
-                    showStatus('statusPontos', `✅ ${xp} XP lançado para o aluno!`, true);
-                    document.getElementById('formLancarPontos').reset();
+    async function carregarAlunosParaPonto(tid) {
+        const sel = document.getElementById('selAlunoPonto');
+        if(!tid) return;
+        const alunos = await obterAlunosPorTurma(tid);
+        sel.innerHTML = '<option value="">Selecione...</option>';
+        alunos.forEach(a => sel.innerHTML += `<option value="${a.id}">${a.nome}</option>`);
+    }
 
-                    // Recarrega a lista de alunos na dropdown (caso o aluno tenha sido removido/adicionado)
-                    carregarAlunosPorTurma(turmaId);
-                    
-                    // Atualiza a lista de gestão (para refletir a mudança no XP)
-                    await carregarDadosGestao();
-                } else {
-                    showStatus('statusPontos', `❌ Erro ao lançar pontos: ${resultado.message}`, false);
-                }
+    async function handleLancarIndividual() {
+        const id = document.getElementById('selAlunoPonto').value;
+        const m = parseInt(document.getElementById('selMissao').value);
+        const e = parseInt(document.getElementById('selExtra').value);
+        const p = parseInt(document.getElementById('selPenalidade').value);
+        if(!id || (m+e+p === 0)) return alert("Preencha os dados!");
+        const res = await atualizarPontuacao(id, m, e, p);
+        if(res.success) { alert("Sucesso!"); init(); }
+    }
 
-            } catch (error) {
-                showStatus('statusPontos', `❌ Erro de processamento: ${error.message}`, false);
-                console.error("Erro ao processar lançamento:", error);
-            }
-        });
+    async function gerarListaColetiva(tid) {
+        const cont = document.getElementById('containerColetivo');
+        const tbody = document.getElementById('listaAlunosColetivo');
+        if(!tid) return cont.style.display = 'none';
+        cont.style.display = 'block';
+        const alunos = await obterAlunosPorTurma(tid);
+        tbody.innerHTML = alunos.map(a => `<tr><td><input type="checkbox" class="check-aluno" value="${a.id}"></td><td style="text-align:left;">${a.nome}</td><td>${a.xpTotal}</td></tr>`).join('');
+    }
 
-        // Inicializa a página ao carregar o DOM
-        document.addEventListener('DOMContentLoaded', inicializarPagina);
-    </script>
+    function marcarTodos(s) { document.querySelectorAll('.check-aluno').forEach(c => c.checked = s); }
+
+    async function handleLancarColetivo() {
+        const ids = Array.from(document.querySelectorAll('.check-aluno:checked')).map(c => c.value);
+        const m = parseInt(document.getElementById('selMissaoColetiva').value);
+        const e = parseInt(document.getElementById('selExtraColetiva').value);
+        if(ids.length && (m+e > 0)) {
+            const res = await atualizarPontuacaoColetiva(ids, m, e);
+            if(res.success) { alert("Lançado!"); gerarListaColetiva(document.getElementById('selTurmaColetiva').value); }
+        }
+    }
+
+    async function carregarGestao() {
+        const div = document.getElementById('listaGestao');
+        div.innerHTML = "Carregando...";
+        const turmas = await obterTurmas();
+        let html = "";
+        for (let t of turmas) {
+            const alunos = await obterAlunosPorTurma(t.id);
+            html += `<div class="turma-card-gestao"><div class="turma-header-gestao"><h3>${t.nome} <span onclick="editT('${t.id}','${t.nome}',${t.metaMensal})" style="cursor:pointer;">✏️</span></h3><button class="btn-delete-turma" onclick="delT('${t.id}')">Excluir Turma</button></div><table class="tabela-alunos-gestao"><thead><tr><th style="text-align:left;">Aluno</th><th>Missões</th><th>Extras</th><th>Perdas</th><th class="xp-acumulado">Total</th><th>Ação</th></tr></thead><tbody>${alunos.map(a => `<tr><td style="text-align:left;">${a.nome} <span onclick="editA('${a.id}','${a.nome}')" style="cursor:pointer;">✏️</span></td><td>${a.xpMissoes||0}</td><td>${a.xpExtra||0}</td><td style="color:red;">${a.xpPenalidade||0}</td><td class="xp-acumulado">${a.xpTotal}</td><td><button class="btn-delete-aluno" onclick="delA('${a.id}','${t.id}')">🗑️</button></td></tr>`).join('')}</tbody></table></div>`;
+        }
+        div.innerHTML = html;
+    }
+
+    async function handleNovaTurma() { const n = document.getElementById('nomeTurma').value; const m = document.getElementById('metaTurma').value; if(n&&m){ await cadastrarTurma(n,m); alert("OK"); init(); } }
+    async function handleNovoAluno() { const n = document.getElementById('nomeAluno').value; const t = document.getElementById('selTurmaCadastro').value; if(n&&t){ await cadastrarAluno(n,t); alert("OK"); } }
+    async function editT(id,n,m) { const nn=prompt("Nome:",n); const nm=prompt("Meta:",m); if(nn&&nm){ await editarTurma(id,nn,nm); carregarGestao(); } }
+    async function editA(id,n) { const nn=prompt("Nome:",n); if(nn){ await editarAluno(id,nn); carregarGestao(); } }
+    async function delA(id,tid) { if(confirm("Excluir?")){ await excluirAluno(id,tid); carregarGestao(); } }
+    async function delT(id) { if(confirm("Excluir turma?")){ await excluirTurma(id); init(); carregarGestao(); } }
+</script>
 </body>
 </html>

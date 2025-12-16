@@ -286,3 +286,19 @@ input[type="text"], input[type="number"], select {
     color: #6C757D;
 }
 
+.tabela-alunos-gestao th {
+    background: #f8f9fa;
+    padding: 10px;
+    font-size: 0.75rem;
+    border-bottom: 2px solid #ddd;
+}
+
+.tabela-alunos-gestao td {
+    padding: 10px;
+    font-size: 0.9rem;
+    text-align: center; /* Centraliza os números para parecer tabela de esportes */
+}
+
+.tabela-alunos-gestao td:first-child {
+    text-align: left; /* Nome do aluno continua alinhado à esquerda */
+}

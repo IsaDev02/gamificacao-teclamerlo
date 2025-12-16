@@ -5,12 +5,16 @@
     <title>Acesso ao Ranking</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body { font-family: Arial, sans-serif; 
-            background-image: url(fundo.webp); 
-            display: flex; justify-content: center; 
+        body.fundo-especial { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #79bfe7, #2446dd); 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
             align-items: center; 
-            min-height: 100vh; 
-             }
+            padding: 20px;
+        }
+
         .login-box { 
             padding: 40px; 
             border-radius: 10px; 
@@ -45,7 +49,7 @@
         .error { background-color: #f2dede; color: #a94442; }
     </style>
 </head>
-<body>
+<body class="fundo-especial">
 
     <div class="login-box">
         <h1>🔐 Acessar Ranking </h1>
@@ -140,5 +144,4 @@
 
     </script>
 </body>
-
 </html>
