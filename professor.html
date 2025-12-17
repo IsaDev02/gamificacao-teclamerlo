@@ -80,7 +80,46 @@
         .btn-pdf { background: #2980b9; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-right: 10px; font-size: 1.1rem; }
         .xp-acumulado { background: #f4f4f4; font-weight: bold; }
         .hidden-content { display: none; }
-    </style>
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+}
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            text-align: center;
+            border-top: 4px solid #4b0082;
+}
+        .stat-card h4 { margin: 0; color: #888; font-size: 0.9rem; text-transform: uppercase; }
+        .stat-card p { margin: 10px 0 0; font-size: 1.8rem; font-weight: bold; color: #4b0082; }
+
+/* Container para os logos dentro do card */
+    .container-logos-internos {
+        display: flex;
+        justify-content: space-between; /* Um em cada ponta */
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #f0f0f0; /* Linha sutil de separação */
+}
+
+    .logo-interna {
+        height: 55px; /* Altura ideal para não ocupar muito espaço */
+        width: auto;
+        object-fit: contain;
+}
+
+/* Ajuste para o título não ficar colado nos logos */
+    .container h1 {
+        margin-top: 10px;
+}
+
+</style>
 </head>
 <body>
 
@@ -99,8 +138,15 @@
 
 <div id="conteudo-painel" class="hidden-content">
     <div class="container">
+        <div class="container-logos-internos">
+                <img src="tecla.png" alt="Centro Social Irmã Tecla Merlo" class="logo-interna">
+        
         <h1>👨‍🏫 Painel do Professor</h1>
 
+                <img src="paulinas.png" alt="Paulinas" class="logo-interna">
+        
+        
+</div>
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab(event, 'tab-pontos')">Lançar Pontos</button>
             <button class="tab-btn" onclick="switchTab(event, 'tab-cadastro')">Novos Cadastros</button>
@@ -163,6 +209,8 @@
         </div>
 
         <div id="tab-gestao" class="tab-content">
+            <div id="statsContainer" class="dashboard-stats"></div>
+            <div id="listaGestao"></div>
             <div id="listaGestao"></div>
         </div>
     </div>
@@ -303,51 +351,95 @@
         }
     }
 
-    async function carregarGestao() {
-        const div = document.getElementById('listaGestao');
-        div.innerHTML = "Carregando...";
-        const turmas = await obterTurmas();
-        let html = "";
-        for (let t of turmas) {
-            const alunos = await obterAlunosPorTurma(t.id);
-            const idTabela = `tabela-${t.id}`;
-            html += `
-                <div class="turma-card-gestao">
-                    <div class="turma-header-gestao">
-                        <h3>${t.nome} <span onclick="editT('${t.id}','${t.nome}',${t.metaMensal})" style="cursor:pointer; font-size: 0.9rem;">✏️</span></h3>
-                        <div>
-                            <button class="btn-pdf" title="Salvar em PDF" onclick="exportarRankingPDF('${idTabela}', '${t.nome}')">💾 PDF</button>
-                            <button class="btn-delete-turma" onclick="delT('${t.id}')">Excluir Turma</button>
-                        </div>
+   async function carregarGestao() {
+    const div = document.getElementById('listaGestao');
+    const statsDiv = document.getElementById('statsContainer');
+    div.innerHTML = "Carregando...";
+    
+    const turmas = await obterTurmas();
+    
+    let html = "";
+    let totalAlunosGeral = 0;
+    let somaXPGeral = 0;
+    let melhorAluno = { nome: "Ninguém", xp: 0 };
+
+    for (let t of turmas) {
+        const alunos = await obterAlunosPorTurma(t.id);
+        const qtdAlunos = alunos.length;
+        const idTabela = `tabela-${t.id}`;
+        
+        totalAlunosGeral += qtdAlunos;
+
+        // Processar dados de cada aluno para estatísticas globais
+        alunos.forEach(a => {
+            somaXPGeral += (a.xpTotal || 0);
+            if ((a.xpTotal || 0) > melhorAluno.xp) {
+                melhorAluno = { nome: a.nome, xp: a.xpTotal };
+            }
+        });
+
+        html += `
+            <div class="turma-card-gestao">
+                <div class="turma-header-gestao">
+                    <h3>${t.nome} 
+                        <span style="font-size: 0.8rem; background: #4b0082; color: white; padding: 2px 8px; border-radius: 10px; margin-left: 10px;">
+                            ${qtdAlunos} ${qtdAlunos === 1 ? 'aluno' : 'alunos'}
+                        </span>
+                        <span onclick="editT('${t.id}','${t.nome}',${t.metaMensal})" style="cursor:pointer; font-size: 0.9rem;">✏️</span>
+                    </h3>
+                    <div>
+                        <button type="button" class="btn-pdf" title="Salvar em PDF" onclick="exportarRankingPDF(event, '${idTabela}', '${t.nome}')">💾 PDF</button>
+                        <button class="btn-delete-turma" onclick="delT('${t.id}')">Excluir Turma</button>
                     </div>
-                    <table class="tabela-alunos-gestao" id="${idTabela}">
-                        <thead>
+                </div>
+                <table class="tabela-alunos-gestao" id="${idTabela}">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">Aluno</th>
+                            <th>Missões</th>
+                            <th>Extras</th>
+                            <th>Perdas</th>
+                            <th class="xp-acumulado">Total</th>
+                            <th class="no-pdf">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${alunos.map(a => `
                             <tr>
-                                <th style="text-align:left;">Aluno</th>
-                                <th>Missões</th>
-                                <th>Extras</th>
-                                <th>Perdas</th>
-                                <th class="xp-acumulado">Total</th>
-                                <th class="no-pdf">Ação</th>
+                                <td style="text-align:left;">${a.nome} <span onclick="editA('${a.id}','${a.nome}')" style="cursor:pointer;">✏️</span></td>
+                                <td>${a.xpMissoes||0}</td>
+                                <td>${a.xpExtra||0}</td>
+                                <td style="color:red;">${a.xpPenalidade||0}</td>
+                                <td class="xp-acumulado">${a.xpTotal}</td>
+                                <td class="no-pdf"><button class="btn-delete-aluno" onclick="delA('${a.id}','${t.id}')">🗑️</button></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${alunos.map(a => `
-                                <tr>
-                                    <td style="text-align:left;">${a.nome} <span onclick="editA('${a.id}','${a.nome}')" style="cursor:pointer;">✏️</span></td>
-                                    <td>${a.xpMissoes||0}</td>
-                                    <td>${a.xpExtra||0}</td>
-                                    <td style="color:red;">${a.xpPenalidade||0}</td>
-                                    <td class="xp-acumulado">${a.xpTotal}</td>
-                                    <td class="no-pdf"><button class="btn-delete-aluno" onclick="delA('${a.id}','${t.id}')">🗑️</button></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>`;
-        }
-        div.innerHTML = html;
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>`;
     }
+
+    // Renderizar os Cards de Estatísticas
+    const mediaXP = totalAlunosGeral > 0 ? Math.round(somaXPGeral / totalAlunosGeral) : 0;
+    
+    statsDiv.innerHTML = `
+        <div class="stat-card">
+            <h4>Total de Alunos</h4>
+            <p>👥 ${totalAlunosGeral}</p>
+        </div>
+        <div class="stat-card">
+            <h4>Média de XP Geral</h4>
+            <p>📊 ${mediaXP}</p>
+        </div>
+        <div class="stat-card">
+            <h4>Top 1 Global</h4>
+            <p title="${melhorAluno.nome}">🏆 ${melhorAluno.xp}</p>
+            <small style="color: #666">${melhorAluno.nome}</small>
+        </div>
+    `;
+
+    div.innerHTML = html;
+}
 
     async function handleNovaTurma() { const n = document.getElementById('nomeTurma').value; const m = document.getElementById('metaTurma').value; if(n&&m){ await cadastrarTurma(n,m); alert("OK"); init(); } }
     async function handleNovoAluno() { const n = document.getElementById('nomeAluno').value; const t = document.getElementById('selTurmaCadastro').value; if(n&&t){ await cadastrarAluno(n,t); alert("OK"); } }

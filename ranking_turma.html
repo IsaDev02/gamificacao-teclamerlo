@@ -48,12 +48,41 @@
         .pos-3 { background-color: #cd7f32 !important; color: white !important; } /* Bronze */
 
         .status-msg { text-align: center; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
-    </style>
+
+        /* Container para os logos dentro do card */
+    .container-logos-internos {
+        display: flex;
+        justify-content: space-between; /* Um em cada ponta */
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #f0f0f0; /* Linha sutil de separação */
+}
+
+    .logo-interna {
+        height: 55px; /* Altura ideal para não ocupar muito espaço */
+        width: auto;
+        object-fit: contain;
+}
+
+/* Ajuste para o título não ficar colado nos logos */
+    .container h1 {
+        margin-top: 10px;
+}
+
+</style>
 </head>
+
 <body>
 
     <div class="ranking-container">
-        <h1>🏆 Ranking: <span id="nomeTurmaRanking">...</span></h1>
+        <div class="container-logos-internos">
+        <img src="tecla.png" alt="Centro Social Irmã Tecla Merlo" class="logo-interna">
+        
+            <h1>🏆 Ranking Detalhado da Turma</h1>
+        <img src="paulinas.png" alt="Centro Social Irmã Tecla Merlo" class="logo-interna">
+    </div>
+        <h1><span id="nomeTurmaRanking">...</span></h1>
         <div id="statusMensagem" class="status-msg" style="display: none;"></div>
 
         <table class="tabela-ranking">

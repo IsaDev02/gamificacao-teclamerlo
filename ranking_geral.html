@@ -30,12 +30,41 @@
             margin-top: 30px; 
             font-size: 1.1em;
         }
+
+/* Container para os logos dentro do card */
+    .container-logos-internos {
+        display: flex;
+        justify-content: space-between; /* Um em cada ponta */
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #f0f0f0; /* Linha sutil de separação */
+}
+
+    .logo-interna {
+        height: 55px; /* Altura ideal para não ocupar muito espaço */
+        width: auto;
+        object-fit: contain;
+}
+
+/* Ajuste para o título não ficar colado nos logos */
+    .container h1 {
+        margin-top: 10px;
+}
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏆 Ranking Geral de Gamificação</h1>
-        <p style="text-align: center;">Os rankings são atualizados em tempo real com base nos lançamentos feitos pelo Professor.</p>
+    
+    <div class="container-logos-internos">
+        <img src="tecla.png" alt="Centro Social Irmã Tecla Merlo" class="logo-interna">
+        
+            <h1>🏆 Ranking Geral de Gamificação</h1>
+        
+        <img src="paulinas.png" alt="Centro Social Irmã Tecla Merlo" class="logo-interna">
+    </div>
+                <p style="text-align: center;">Os rankings são atualizados em tempo real com base nos lançamentos feitos pelo Professor.</p>
 
         <h2>Ranking de Alunos (Individual)</h2>
         <table class="ranking-table">
