@@ -4,79 +4,49 @@
     <meta charset="UTF-8">
     <title>Painel do Professor - Área Restrita</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
         
         /* Fundo animado em degradê */
-#lock-screen {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(-45deg, #4b0082, #8a2be2, #240b36, #c71585);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
+        #lock-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(-45deg, #4b0082, #8a2be2, #240b36, #c71585);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
 
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-/* O Box de Login (Card) */
-.login-box {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-    text-align: center;
-    width: 320px;
-    border: 1px solid rgba(255,255,255,0.3);
-}
+        /* O Box de Login (Card) */
+        .login-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 320px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
 
-.login-box .icon-lock {
-    font-size: 3rem;
-    margin-bottom: 15px;
-}
+        .login-box .icon-lock { font-size: 3rem; margin-bottom: 15px; }
+        .login-box h2 { color: #333; font-size: 1.5rem; margin-bottom: 5px; }
+        .login-box p { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+        .login-box input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; outline: none; transition: 0.3s; font-size: 1rem; text-align: center; }
+        .login-box input:focus { border-color: #4b0082; box-shadow: 0 0 10px rgba(75, 0, 130, 0.1); }
 
-.login-box h2 {
-    color: #333;
-    font-size: 1.5rem;
-    margin-bottom: 5px;
-}
-
-.login-box p {
-    color: #666;
-    font-size: 0.9rem;
-    margin-bottom: 20px;
-}
-
-.login-box input {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #eee;
-    border-radius: 10px;
-    outline: none;
-    transition: 0.3s;
-    font-size: 1rem;
-    text-align: center;
-}
-
-.login-box input:focus {
-    border-color: #4b0082;
-    box-shadow: 0 0 10px rgba(75, 0, 130, 0.1);
-}
-
-#erroSenha {
-    color: #ff4d4d;
-    font-size: 0.8rem;
-    margin-top: 10px;
-    font-weight: bold;
-    display: none;
-}
+        #erroSenha { color: #ff4d4d; font-size: 0.8rem; margin-top: 10px; font-weight: bold; display: none; }
 
         /* --- Layout do Painel --- */
         .container { max-width: 1100px; margin: auto; padding: 20px; }
@@ -107,7 +77,9 @@
         .btn-coletivo { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-delete-aluno { background: none; border: 1px solid #ff4d4d; color: #ff4d4d; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
         .btn-delete-turma { background: #ff4d4d; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+        .btn-pdf { background: #2980b9; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-right: 10px; font-size: 1.1rem; }
         .xp-acumulado { background: #f4f4f4; font-weight: bold; }
+        .hidden-content { display: none; }
     </style>
 </head>
 <body>
@@ -117,13 +89,8 @@
         <div class="icon-lock"> 🔐 </div>
         <h2>Acesso Restrito</h2>
         <p>Área exclusiva do Professor</p>
-        
-        <input type="password" id="inputSenha" 
-               onkeyup="verificarSenha(event)" 
-               placeholder="Digite sua senha">
-               
+        <input type="password" id="inputSenha" onkeyup="verificarSenha(event)" placeholder="Digite sua senha">
         <p id="erroSenha">⚠️ Senha incorreta. Tente novamente.</p>
-        
         <div style="margin-top: 20px; font-size: 0.7rem; color: #aaa;">
             Centro Social Irmã Tecla Merlo &copy; 2025
         </div>
@@ -218,11 +185,47 @@
 <script src="gamificacao.js"></script>
 
 <script>
+    // --- FUNÇÃO PARA GERAR PDF ---
+    function exportarRankingPDF(idTabela, nomeTurma) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Configurações do cabeçalho do PDF
+        doc.setFontSize(18);
+        doc.text("Ranking de Alunos - Gamificação", 14, 20);
+        doc.setFontSize(12);
+        doc.text(`Turma: ${nomeTurma}`, 14, 30);
+        doc.text(`Data de Emissão: ${new Date().toLocaleDateString()}`, 14, 38);
+
+        // Gera a tabela no PDF ignorando a última coluna (Ação/Lixeira)
+        doc.autoTable({
+            html: `#${idTabela}`,
+            startY: 45,
+            theme: 'grid',
+            headStyles: { fillColor: [75, 0, 130] }, // Cor Indigo (mesma do painel)
+            columns: [
+                { header: 'Aluno', dataKey: 'aluno' },
+                { header: 'Missões', dataKey: 'missoes' },
+                { header: 'Extras', dataKey: 'extras' },
+                { header: 'Perdas', dataKey: 'perdas' },
+                { header: 'Total XP', dataKey: 'total' }
+            ],
+            // Função para remover ícones de lápis ou lixeiras do texto do PDF
+            didParseCell: function(data) {
+                if (data.section === 'body') {
+                    data.cell.text[0] = data.cell.text[0].replace(/✏️|🗑️/g, '').trim();
+                }
+            }
+        });
+
+        doc.save(`Ranking_${nomeTurma}.pdf`);
+    }
+
     // --- SEGURANÇA ---
     function verificarSenha(event) {
         if (event.key === "Enter") {
             const senha = document.getElementById('inputSenha').value;
-            if (senha === "192837") { // <--- Altere sua senha aqui
+            if (senha === "192837") { 
                 document.getElementById('lock-screen').style.display = 'none';
                 document.getElementById('conteudo-painel').classList.remove('hidden-content');
                 init();
@@ -247,13 +250,17 @@
         const turmas = await obterTurmas();
         ['selTurmaPonto', 'selTurmaCadastro', 'selTurmaColetiva'].forEach(id => {
             const el = document.getElementById(id);
-            el.innerHTML = '<option value="">Selecione...</option>';
-            turmas.forEach(t => el.innerHTML += `<option value="${t.id}">${t.nome}</option>`);
+            if(el) {
+                el.innerHTML = '<option value="">Selecione...</option>';
+                turmas.forEach(t => el.innerHTML += `<option value="${t.id}">${t.nome}</option>`);
+            }
         });
         const missoes = obterMissoes();
         ['selMissao', 'selMissaoColetiva'].forEach(id => {
             const el = document.getElementById(id);
-            missoes.forEach(m => el.innerHTML += `<option value="${m.xp}">${m.nome} (+${m.xp})</option>`);
+            if(el) {
+                missoes.forEach(m => el.innerHTML += `<option value="${m.xp}">${m.nome} (+${m.xp})</option>`);
+            }
         });
     }
 
@@ -303,7 +310,41 @@
         let html = "";
         for (let t of turmas) {
             const alunos = await obterAlunosPorTurma(t.id);
-            html += `<div class="turma-card-gestao"><div class="turma-header-gestao"><h3>${t.nome} <span onclick="editT('${t.id}','${t.nome}',${t.metaMensal})" style="cursor:pointer;">✏️</span></h3><button class="btn-delete-turma" onclick="delT('${t.id}')">Excluir Turma</button></div><table class="tabela-alunos-gestao"><thead><tr><th style="text-align:left;">Aluno</th><th>Missões</th><th>Extras</th><th>Perdas</th><th class="xp-acumulado">Total</th><th>Ação</th></tr></thead><tbody>${alunos.map(a => `<tr><td style="text-align:left;">${a.nome} <span onclick="editA('${a.id}','${a.nome}')" style="cursor:pointer;">✏️</span></td><td>${a.xpMissoes||0}</td><td>${a.xpExtra||0}</td><td style="color:red;">${a.xpPenalidade||0}</td><td class="xp-acumulado">${a.xpTotal}</td><td><button class="btn-delete-aluno" onclick="delA('${a.id}','${t.id}')">🗑️</button></td></tr>`).join('')}</tbody></table></div>`;
+            const idTabela = `tabela-${t.id}`;
+            html += `
+                <div class="turma-card-gestao">
+                    <div class="turma-header-gestao">
+                        <h3>${t.nome} <span onclick="editT('${t.id}','${t.nome}',${t.metaMensal})" style="cursor:pointer; font-size: 0.9rem;">✏️</span></h3>
+                        <div>
+                            <button class="btn-pdf" title="Salvar em PDF" onclick="exportarRankingPDF('${idTabela}', '${t.nome}')">💾 PDF</button>
+                            <button class="btn-delete-turma" onclick="delT('${t.id}')">Excluir Turma</button>
+                        </div>
+                    </div>
+                    <table class="tabela-alunos-gestao" id="${idTabela}">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">Aluno</th>
+                                <th>Missões</th>
+                                <th>Extras</th>
+                                <th>Perdas</th>
+                                <th class="xp-acumulado">Total</th>
+                                <th class="no-pdf">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${alunos.map(a => `
+                                <tr>
+                                    <td style="text-align:left;">${a.nome} <span onclick="editA('${a.id}','${a.nome}')" style="cursor:pointer;">✏️</span></td>
+                                    <td>${a.xpMissoes||0}</td>
+                                    <td>${a.xpExtra||0}</td>
+                                    <td style="color:red;">${a.xpPenalidade||0}</td>
+                                    <td class="xp-acumulado">${a.xpTotal}</td>
+                                    <td class="no-pdf"><button class="btn-delete-aluno" onclick="delA('${a.id}','${t.id}')">🗑️</button></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
         }
         div.innerHTML = html;
     }
