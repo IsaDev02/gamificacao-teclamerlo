@@ -10,7 +10,6 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
         
-        /* Fundo animado do Login */
         #lock-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -19,50 +18,43 @@
             animation: gradientBG 15s ease infinite;
             display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
+
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-        .login-box { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 320px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
 
-        /* Layout */
+        .login-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center; width: 320px; }
+
         .container { max-width: 1100px; margin: auto; padding: 20px; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        .hidden-content { display: none; }
         
-        .container-logos-internos { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .logo-interna { height: 50px; }
-
-        /* Abas */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
-        .tab-btn { padding: 12px 20px; cursor: pointer; border: none; background: #e0e0e0; border-radius: 8px 8px 0 0; font-weight: bold; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        .tab-btn { padding: 12px 25px; cursor: pointer; border: none; background: #e0e0e0; border-radius: 8px; font-weight: bold; }
         .tab-btn.active { background: #4b0082; color: white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Formulários */
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .btn-principal { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 6px; width: 100%; cursor: pointer; font-weight: bold; }
-        .btn-principal:hover { background: #3a0066; }
+        .container-logos-internos { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; }
+        .logo-interna { height: 55px; }
 
-        /* Gestão e Tabelas */
-        .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; border-top: 4px solid #4b0082; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .turma-card-gestao { border: 1px solid #ddd; border-radius: 12px; margin-bottom: 30px; background: white; overflow: hidden; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px; box-sizing: border-box; }
+        .btn-principal { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 6px; width: 100%; cursor: pointer; font-weight: bold; }
+        
+        .hidden-content { display: none; }
+        
+        /* Estilos Gestão */
+        .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; border-top: 4px solid #4b0082; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .turma-card-gestao { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 25px; overflow: hidden; }
         .turma-header-gestao { background: #f8f9fa; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4b0082; }
         .tabela-alunos-gestao { width: 100%; border-collapse: collapse; }
         .tabela-alunos-gestao th, .tabela-alunos-gestao td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
         
         /* Barra de Progresso */
-        .progress-wrapper { padding: 15px; background: #fdfdfd; }
-        .progress-container { background: #e9ecef; border-radius: 10px; height: 14px; width: 100%; overflow: hidden; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, #4b0082, #8a2be2); transition: width 1s; }
-        .meta-atingida { background: linear-gradient(90deg, #28a745, #2ecc71) !important; }
-
-        .btn-delete-aluno { color: #ff4d4d; border: none; background: none; cursor: pointer; font-size: 1.2rem; }
-        .btn-delete-turma { background: #ff4d4d; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
-        .btn-pdf { background: #2980b9; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin-right: 5px; }
+        .progress-container { background: #eee; border-radius: 10px; height: 12px; width: 100%; overflow: hidden; margin-top: 5px; }
+        .progress-bar { background: #4b0082; height: 100%; transition: width 0.5s; }
     </style>
 </head>
 <body>
@@ -70,8 +62,7 @@
 <div id="lock-screen">
     <div class="login-box">
         <h2>🔐 Acesso Restrito</h2>
-        <p>Digite a senha do professor:</p>
-        <input type="password" id="inputSenha" onkeyup="verificarSenha(event)" placeholder="Senha">
+        <input type="password" id="inputSenha" onkeyup="verificarSenha(event)" placeholder="Digite a senha">
         <p id="erroSenha" style="color:red; display:none;">⚠️ Senha incorreta.</p>
     </div>
 </div>
@@ -81,36 +72,30 @@
         <div class="card">
             <div class="container-logos-internos">
                 <img src="tecla.png" alt="Logo" class="logo-interna">
-                <h1>Painel do Professor</h1>
+                <h1>👨‍🏫 Painel do Professor</h1>
                 <img src="paulinas.png" alt="Logo" class="logo-interna">
             </div>
 
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab(event, 'tab-pontos')">🎯 Pontos</button>
-                <button class="tab-btn" onclick="switchTab(event, 'tab-cadastro')">➕ Cadastros</button>
-                <button class="tab-btn" onclick="switchTab(event, 'tab-gestao')">📊 Gestão</button>
+                <button class="tab-btn active" onclick="switchTab(event, 'tab-pontos')">Lançar Pontos</button>
+                <button class="tab-btn" onclick="switchTab(event, 'tab-cadastro')">Novos Cadastros</button>
+                <button class="tab-btn" onclick="switchTab(event, 'tab-gestao')">Gestão de Dados</button>
             </div>
 
             <div id="tab-pontos" class="tab-content active">
                 <div class="card">
-                    <h3>Lançar Pontuação Individual</h3>
-                    <label>Selecione a Turma:</label>
-                    <select id="selTurmaPonto" onchange="carregarAlunosParaPonto(this.value)"><option value="">Carregando...</option></select>
-                    <label>Selecione o Aluno:</label>
-                    <select id="selAlunoPonto"><option value="">Selecione a turma primeiro...</option></select>
+                    <h2>🎯 Lançamento de XP</h2>
+                    <select id="selTurmaPonto" onchange="carregarAlunosParaPonto(this.value)"><option value="">Carregando turmas...</option></select>
+                    <select id="selAlunoPonto"><option value="">Selecione a turma...</option></select>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div>
-                            <label>XP Missão (+):</label>
-                            <input type="number" id="xpM" value="0">
-                        </div>
-                        <div>
-                            <label>XP Extra (+):</label>
-                            <input type="number" id="xpE" value="0">
-                        </div>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="valorXP" placeholder="Quantidade de XP">
+                        <select id="tipoXP">
+                            <option value="missao">XP Missão (+)</option>
+                            <option value="extra">XP Extra (+)</option>
+                            <option value="penalidade">Penalidade (-)</option>
+                        </select>
                     </div>
-                    <label>Penalidade (-):</label>
-                    <input type="number" id="xpP" value="0" style="color: red;">
                     
                     <button class="btn-principal" onclick="handleLancarIndividual()">Confirmar Pontos</button>
                 </div>
@@ -118,14 +103,14 @@
 
             <div id="tab-cadastro" class="tab-content">
                 <div class="card">
-                    <h3>Nova Turma</h3>
-                    <input type="text" id="nomeTurma" placeholder="Ex: Informática Manhã">
-                    <input type="number" id="metaTurma" placeholder="Meta de XP Mensal (ex: 2000)">
+                    <h2>Nova Turma</h2>
+                    <input type="text" id="nomeTurma" placeholder="Nome da Turma">
+                    <input type="number" id="metaTurma" placeholder="Meta de XP Mensal (Ex: 2000)">
                     <button class="btn-principal" onclick="handleNovaTurma()">Criar Turma</button>
                 </div>
                 <div class="card">
-                    <h3>Novo Aluno</h3>
-                    <input type="text" id="nomeAluno" placeholder="Nome completo do aluno">
+                    <h2>Novo Aluno</h2>
+                    <input type="text" id="nomeAluno" placeholder="Nome do Aluno">
                     <select id="selTurmaCadastro"><option value="">Selecione a turma...</option></select>
                     <button class="btn-principal" onclick="handleNovoAluno()">Cadastrar Aluno</button>
                 </div>
@@ -135,7 +120,6 @@
                 <div id="statsContainer" class="dashboard-stats"></div>
                 <div id="listaGestao"></div>
             </div>
-
         </div>
     </div>
 </div>
@@ -144,7 +128,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
-    // 1. CONFIGURAÇÃO FIREBASE
+    // 1. CONFIGURAÇÃO
     const firebaseConfig = {
         apiKey: "AIzaSyCokj8lu7OEwynnteAT3iObnz8qbV1Hvwk",
         authDomain: "centro-social-tecla-merlo.firebaseapp.com",
@@ -156,7 +140,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. SEGURANÇA E NAVEGAÇÃO
+    // 2. SEGURANÇA
     function verificarSenha(event) {
         if (event.key === "Enter") {
             const senha = document.getElementById('inputSenha').value;
@@ -178,7 +162,7 @@
         if(tabId === 'tab-gestao') carregarGestao();
     }
 
-    // 3. LÓGICA DE DADOS (INIT)
+    // 3. INICIALIZAÇÃO E CADASTROS
     async function init() {
         const snapshot = await db.collection("turmas").orderBy("nome").get();
         const turmas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -190,33 +174,26 @@
         });
     }
 
-    // 4. CADASTROS
     async function handleNovaTurma() {
         const nome = document.getElementById('nomeTurma').value;
         const meta = parseInt(document.getElementById('metaTurma').value);
-        if(!nome || !meta) return alert("Preencha o nome e a meta!");
-        try {
-            await db.collection("turmas").add({ nome, metaMensal: meta });
-            alert("Turma criada!");
-            document.getElementById('nomeTurma').value = "";
-            init();
-        } catch (e) { alert("Erro ao salvar no banco."); }
+        if(!nome || !meta) return alert("Preencha todos os campos!");
+        await db.collection("turmas").add({ nome, metaMensal: meta });
+        alert("Turma criada!");
+        init();
     }
 
     async function handleNovoAluno() {
         const nome = document.getElementById('nomeAluno').value;
         const tid = document.getElementById('selTurmaCadastro').value;
-        if(!nome || !tid) return alert("Preencha o nome e selecione a turma!");
-        try {
-            await db.collection("alunos").add({
-                nome, turmaId: tid, xpTotal: 0, xpMissoes: 0, xpExtra: 0, xpPenalidade: 0
-            });
-            alert("Aluno cadastrado!");
-            document.getElementById('nomeAluno').value = "";
-        } catch (e) { alert("Erro ao salvar aluno."); }
+        if(!nome || !tid) return alert("Preencha todos os campos!");
+        await db.collection("alunos").add({
+            nome, turmaId: tid, xpTotal: 0, xpMissoes: 0, xpExtra: 0, xpPenalidade: 0
+        });
+        alert("Aluno cadastrado!");
     }
 
-    // 5. LANÇAMENTO DE PONTOS
+    // 4. LANÇAMENTO DE PONTOS
     async function carregarAlunosParaPonto(tid) {
         const sel = document.getElementById('selAlunoPonto');
         if(!tid) return;
@@ -226,116 +203,89 @@
     }
 
     async function handleLancarIndividual() {
-        const aid = document.getElementById('selAlunoPonto').value;
-        const m = parseInt(document.getElementById('xpM').value) || 0;
-        const e = parseInt(document.getElementById('xpE').value) || 0;
-        const p = parseInt(document.getElementById('xpP').value) || 0;
+        const alunoId = document.getElementById('selAlunoPonto').value;
+        const valor = parseInt(document.getElementById('valorXP').value);
+        const tipo = document.getElementById('tipoXP').value;
 
-        if(!aid) return alert("Selecione um aluno!");
+        if(!alunoId || !valor) return alert("Preencha o valor e selecione o aluno!");
 
-        try {
-            const ref = db.collection("alunos").doc(aid);
-            const doc = await ref.get();
-            const data = doc.data();
+        const ref = db.collection("alunos").doc(alunoId);
+        const doc = await ref.get();
+        const dados = doc.data();
 
-            await ref.update({
-                xpMissoes: (data.xpMissoes || 0) + m,
-                xpExtra: (data.xpExtra || 0) + e,
-                xpPenalidade: (data.xpPenalidade || 0) + p,
-                xpTotal: (data.xpTotal || 0) + m + e - p
-            });
+        let up = {};
+        if(tipo === "missao") {
+            up.xpMissoes = (dados.xpMissoes || 0) + valor;
+            up.xpTotal = (dados.xpTotal || 0) + valor;
+        } else if(tipo === "extra") {
+            up.xpExtra = (dados.xpExtra || 0) + valor;
+            up.xpTotal = (dados.xpTotal || 0) + valor;
+        } else {
+            up.xpPenalidade = (dados.xpPenalidade || 0) + valor;
+            up.xpTotal = (dados.xpTotal || 0) - valor;
+        }
 
-            alert("Pontos atualizados!");
-            document.getElementById('xpM').value = 0; document.getElementById('xpE').value = 0; document.getElementById('xpP').value = 0;
-        } catch (err) { alert("Erro ao atualizar pontos."); }
+        await ref.update(up);
+        alert("XP Atualizado com sucesso!");
+        document.getElementById('valorXP').value = "";
     }
 
-    // 6. ABA GESTÃO (COM BARRA DE PROGRESSO)
+    // 5. GESTÃO DE DADOS (CARREGAMENTO COMPLETO)
     async function carregarGestao() {
         const div = document.getElementById('listaGestao');
         const statsDiv = document.getElementById('statsContainer');
-        div.innerHTML = "Carregando dados...";
+        div.innerHTML = "Carregando...";
 
-        const snapT = await db.collection("turmas").orderBy("nome").get();
-        const turmas = snapT.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+        const snapTurmas = await db.collection("turmas").orderBy("nome").get();
         let html = "";
-        let totalAlunosGeral = 0;
-        let somaXPGeral = 0;
-        let melhorAluno = { nome: "Ninguém", xp: 0 };
+        let totalAlunos = 0;
+        let somaXP = 0;
 
-        for (let t of turmas) {
-            const snapA = await db.collection("alunos").where("turmaId", "==", t.id).get();
-            const alunos = snapA.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            alunos.sort((a, b) => (b.xpTotal || 0) - (a.xpTotal || 0));
+        for (let docT of snapTurmas.docs) {
+            const t = docT.data();
+            const tId = docT.id;
+            const snapAlunos = await db.collection("alunos").where("turmaId", "==", tId).get();
+            const alunos = snapAlunos.docs.map(d => ({id: d.id, ...d.data()}));
+            
+            alunos.sort((a,b) => b.xpTotal - a.xpTotal);
+            const xpTurma = alunos.reduce((acc, al) => acc + al.xpTotal, 0);
+            const perc = Math.min(Math.round((xpTurma / (t.metaMensal || 1000)) * 100), 100);
 
-            const qtd = alunos.length;
-            const somaXP = alunos.reduce((acc, a) => acc + (a.xpTotal || 0), 0);
-            const meta = t.metaMensal || 1000;
-            const perc = Math.round((somaXP / meta) * 100);
-            const largura = perc > 100 ? 100 : perc;
-
-            totalAlunosGeral += qtd;
-            somaXPGeral += somaXP;
+            totalAlunos += alunos.length;
+            somaXP += xpTurma;
 
             html += `
                 <div class="turma-card-gestao">
                     <div class="turma-header-gestao">
-                        <h3>${t.nome} <small>(${qtd} alunos)</small></h3>
-                        <div>
-                            <button class="btn-pdf" onclick="exportarPDF('tab-${t.id}', '${t.nome}')">PDF</button>
-                            <button class="btn-delete-turma" onclick="delT('${t.id}')">Excluir</button>
-                        </div>
+                        <h3>${t.nome}</h3>
+                        <button onclick="deletarTurma('${tId}')" style="color:red; background:none; border:none; cursor:pointer;">Excluir Turma</button>
                     </div>
-                    
-                    <div class="progress-wrapper">
-                        <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;">
-                            <span>Progresso da Meta</span>
-                            <span>${perc}% (${somaXP}/${meta} XP)</span>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar ${perc >= 100 ? 'meta-atingida' : ''}" style="width:${largura}%"></div>
-                        </div>
+                    <div style="padding:15px;">
+                        <small>Meta: ${xpTurma} / ${t.metaMensal} XP</small>
+                        <div class="progress-container"><div class="progress-bar" style="width:${perc}%"></div></div>
                     </div>
-
-                    <table class="tabela-alunos-gestao" id="tab-${t.id}">
-                        <thead>
-                            <tr><th>Nome</th><th>Missão</th><th>Extra</th><th>Pen.</th><th>Total</th><th>Ação</th></tr>
-                        </thead>
-                        <tbody>
-                            ${alunos.map(a => {
-                                if(a.xpTotal > melhorAluno.xp) melhorAluno = {nome: a.nome, xp: a.xpTotal};
-                                return `<tr>
-                                    <td style="text-align:left;">${a.nome}</td>
-                                    <td>${a.xpMissoes}</td><td>${a.xpExtra}</td><td style="color:red">${a.xpPenalidade}</td>
-                                    <td style="font-weight:bold">${a.xpTotal}</td>
-                                    <td><button class="btn-delete-aluno" onclick="delA('${a.id}')">🗑️</button></td>
-                                </tr>`;
-                            }).join('')}
-                        </tbody>
+                    <table class="tabela-alunos-gestao">
+                        ${alunos.map(a => `
+                            <tr>
+                                <td style="text-align:left; padding-left:15px;">${a.nome}</td>
+                                <td>${a.xpTotal} XP</td>
+                                <td><button onclick="deletarAluno('${a.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button></td>
+                            </tr>
+                        `).join('')}
                     </table>
                 </div>`;
         }
-
+        
         statsDiv.innerHTML = `
-            <div class="stat-card"><h4>Total Alunos</h4><p>${totalAlunosGeral}</p></div>
-            <div class="stat-card"><h4>Média XP</h4><p>${totalAlunosGeral > 0 ? Math.round(somaXPGeral/totalAlunosGeral) : 0}</p></div>
-            <div class="stat-card"><h4>Top 1</h4><p>🏆 ${melhorAluno.xp}</p><small>${melhorAluno.nome}</small></div>
+            <div class="stat-card"><h3>${totalAlunos}</h3><p>Alunos</p></div>
+            <div class="stat-card"><h3>${somaXP}</h3><p>XP Total Geral</p></div>
         `;
         div.innerHTML = html;
     }
 
-    async function delT(id) { if(confirm("Excluir turma?")) { await db.collection("turmas").doc(id).delete(); carregarGestao(); init(); } }
-    async function delA(id) { if(confirm("Excluir aluno?")) { await db.collection("alunos").doc(id).delete(); carregarGestao(); } }
+    async function deletarTurma(id) { if(confirm("Excluir turma?")) { await db.collection("turmas").doc(id).delete(); carregarGestao(); } }
+    async function deletarAluno(id) { if(confirm("Excluir aluno?")) { await db.collection("alunos").doc(id).delete(); carregarGestao(); } }
 
-    function exportarPDF(id, nome) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text(`Ranking: ${nome}`, 14, 15);
-        doc.autoTable({ html: `#${id}`, startY: 20 });
-        doc.save(`Ranking_${nome}.pdf`);
-    }
 </script>
-
 </body>
 </html>
